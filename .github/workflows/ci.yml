@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - main # If we want to switch to main as default branch
+  pull_request:
+    branches:
+      - master
+      - main # If we want to switch to main as default branch
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: [ '1.20', '1.21' ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    name: CI - Go ${{ matrix.go }} - ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+      - run: make install
+      - run: make lint
+      - run: make test
+      - run: make build

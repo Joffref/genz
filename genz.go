@@ -60,7 +60,7 @@ func (g *Generator) parsePackage(patterns []string, tags []string) {
 
 // addPackage adds a type checked Package and its syntax files to the generator.
 func (g *Generator) addPackage(pkg *packages.Package) {
-	fmt.Printf("found package %s\n", pkg)
+	log.Printf("found package %s\n", pkg)
 	g.pkg = &Package{
 		name:      pkg.Name,
 		pkgPath:   pkg.PkgPath,
@@ -144,7 +144,7 @@ func main() {
 	}
 	template, err := os.ReadFile(*templateFile)
 	if err != nil {
-		log.Fatalf("failed to read template file: %s", *templateFile)
+		log.Fatalf("failed to read template file %s: %v", *templateFile, err)
 	}
 
 	// We accept either one directory or a list of files. Which do we have?
