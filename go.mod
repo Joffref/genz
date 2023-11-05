@@ -1,4 +1,4 @@
-module github.com/joffref/genz
+module github.com/Joffref/genz
 
 go 1.20
 
