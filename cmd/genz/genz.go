@@ -3,13 +3,14 @@ package genz
 import (
 	"flag"
 	"fmt"
-	"github.com/Joffref/genz/internal/command"
-	"github.com/Joffref/genz/internal/generator"
-	"github.com/Joffref/genz/internal/utils"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/Joffref/genz/internal/command"
+	"github.com/Joffref/genz/internal/generator"
+	"github.com/Joffref/genz/internal/utils"
 )
 
 type generateCommand struct {
@@ -72,7 +73,7 @@ func (c generateCommand) Run() error {
 	}
 
 	// We accept either one directory or a list of files. Which do we have?
-	args := flag.Args()
+	args := generateCmd.Args()
 	if len(args) == 0 {
 		// Default: process whole package in current directory.
 		args = []string{"."}
@@ -81,9 +82,9 @@ func (c generateCommand) Run() error {
 	// Parse the package once.
 	g := generator.Generator{
 		Template: string(template),
+		Pkg:      utils.LoadPackage(args, tags),
 	}
 
-	g.ParsePackage(args, tags)
 	// Run generate for each type.
 	for _, typeName := range types {
 		g.Generate(typeName)
