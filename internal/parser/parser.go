@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"go/types"
+	"go/ast"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -12,30 +12,30 @@ func Parse(pkg *packages.Package, typeName string) (ParsedType, error) {
 		Type: Type(typeName),
 	}
 
-	for ident, obj := range pkg.TypesInfo.Defs {
+	for ident := range pkg.TypesInfo.Defs {
 		if ident.Name == typeName {
-			structType, isStruct := obj.Type().Underlying().(*types.Struct)
+			typeSpec, isTypeSpec := ident.Obj.Decl.(*ast.TypeSpec)
+			if !isTypeSpec {
+				return ParsedType{}, fmt.Errorf("%s is not a type", typeName)
+			}
+			structDeclaration, isStruct := typeSpec.Type.(*ast.StructType)
 			if !isStruct {
-				return ParsedType{}, fmt.Errorf("type %s is not a struct", typeName)
+				return ParsedType{}, fmt.Errorf("%s is not a struct", typeName)
 			}
 
-			p.Attributes = structAttributes(structType)
+			for _, field := range structDeclaration.Fields.List {
+				comments := make([]string, len(field.Doc.List))
+				for i, comment := range field.Doc.List {
+					comments[i] = comment.Text[2:]
+				}
+				p.Attributes = append(p.Attributes, Attributes{
+					Name:     field.Names[0].Name,
+					Type:     Type(pkg.TypesInfo.TypeOf(field.Type).String()),
+					Comments: comments,
+				})
+			}
 		}
 	}
 
 	return p, nil
-}
-
-func structAttributes(structType *types.Struct) []Attributes {
-	var attributes []Attributes
-	for i := 0; i < structType.NumFields(); i++ {
-
-		attribute := structType.Field(i)
-		attributes = append(attributes, Attributes{
-			Name: attribute.Name(),
-			Type: Type(attribute.Origin().Type().String()),
-		})
-	}
-
-	return attributes
 }

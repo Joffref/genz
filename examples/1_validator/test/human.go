@@ -2,10 +2,13 @@ package test
 
 //go:generate genz -type Human -template ../main.tmpl -output human_validator.gen.go
 type Human struct {
+	//+startsWithCapital
+	Firstname string
 
-	//+validator=optional
-	Name string
+	//+optional
+	//+startsWithCapital
+	Lastname string
 
-	//+validator=>18,<99
+	//+>18,<99
 	Age uint
 }

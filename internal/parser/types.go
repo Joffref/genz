@@ -11,7 +11,7 @@ type (
 		Name string
 		Type Type
 
-		Keys []map[string]string
+		Comments []string
 	}
 
 	Type string
