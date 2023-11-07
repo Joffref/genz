@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/Joffref/genz/internal/parser"
+	"github.com/Masterminds/sprig/v3"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -25,7 +26,7 @@ func (g *Generator) Generate(typeName string) {
 		log.Fatalf("failed to inspect package: %v", err)
 	}
 
-	tmpl, err := template.New("template").Parse(g.Template)
+	tmpl, err := template.New("template").Funcs(sprig.FuncMap()).Parse(g.Template)
 	if err != nil {
 		log.Fatalf("failed to parse template: %v", err)
 	}
