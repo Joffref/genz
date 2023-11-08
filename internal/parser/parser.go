@@ -3,39 +3,59 @@ package parser
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 
 	"golang.org/x/tools/go/packages"
 )
 
-func Parse(pkg *packages.Package, typeName string) (ParsedType, error) {
-	p := ParsedType{
-		Type: Type(typeName),
+func Parse(pkg *packages.Package, structName string) (Struct, error) {
+	for ident := range pkg.TypesInfo.Defs {
+		if ident.Name == structName {
+			structType, err := identAsStructType(ident)
+			if err != nil {
+				return Struct{}, err
+			}
+
+			return Struct{
+				Type:       Type(structName),
+				Attributes: structAttributes(pkg.TypesInfo, structType),
+			}, nil
+		}
+	}
+	return Struct{}, fmt.Errorf("struct %s not found in package %s", structName, pkg.Name)
+}
+
+func identAsStructType(ident *ast.Ident) (*ast.StructType, error) {
+	typeSpec, isTypeSpec := ident.Obj.Decl.(*ast.TypeSpec)
+	if !isTypeSpec {
+		return nil, fmt.Errorf("%s is not a type", ident.Name)
 	}
 
-	for ident := range pkg.TypesInfo.Defs {
-		if ident.Name == typeName {
-			typeSpec, isTypeSpec := ident.Obj.Decl.(*ast.TypeSpec)
-			if !isTypeSpec {
-				return ParsedType{}, fmt.Errorf("%s is not a type", typeName)
-			}
-			structDeclaration, isStruct := typeSpec.Type.(*ast.StructType)
-			if !isStruct {
-				return ParsedType{}, fmt.Errorf("%s is not a struct", typeName)
-			}
+	structDeclaration, isStruct := typeSpec.Type.(*ast.StructType)
+	if !isStruct {
+		return nil, fmt.Errorf("%s is not a struct", ident.Name)
+	}
 
-			for _, field := range structDeclaration.Fields.List {
-				comments := make([]string, len(field.Doc.List))
-				for i, comment := range field.Doc.List {
-					comments[i] = comment.Text[2:]
-				}
-				p.Attributes = append(p.Attributes, Attributes{
-					Name:     field.Names[0].Name,
-					Type:     Type(pkg.TypesInfo.TypeOf(field.Type).String()),
-					Comments: comments,
-				})
+	return structDeclaration, nil
+}
+
+func structAttributes(typesInfo *types.Info, structType *ast.StructType) []Attribute {
+	attributes := make([]Attribute, len(structType.Fields.List))
+
+	for i, field := range structType.Fields.List {
+		comments := []string{}
+		if field.Doc != nil {
+			for _, comment := range field.Doc.List {
+				comments = append(comments, comment.Text[2:])
 			}
+		}
+
+		attributes[i] = Attribute{
+			Name:     field.Names[0].Name,
+			Type:     Type(typesInfo.TypeOf(field.Type).String()),
+			Comments: comments,
 		}
 	}
 
-	return p, nil
+	return attributes
 }
