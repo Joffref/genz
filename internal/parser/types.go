@@ -1,13 +1,13 @@
 package parser
 
 type (
-	ParsedType struct {
+	Struct struct {
 		Type Type
 
-		Attributes []Attributes
+		Attributes []Attribute
 	}
 
-	Attributes struct {
+	Attribute struct {
 		Name string
 		Type Type
 
