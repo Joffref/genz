@@ -1,0 +1,62 @@
+name: Feature Request
+description: File a feature request
+title: "[Feature]: "
+labels: ["feature", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this enhancement proposal!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: what-is-the-feature
+    attributes:
+      label: What is the feature?
+      description: What is the feature that you are trying to add?
+      placeholder: Tell us what you see!
+      value: "A feature happened!"
+    validations:
+      required: true
+  - type: textarea
+    id: what-is-the-solution
+    attributes:
+      label: What is the solution?
+      description: What is the solution that you are proposing?
+      placeholder: Tell us what you see!
+      value: "A solution happened!"
+  - type: textarea
+    id: why-is-this-important
+    attributes:
+      label: Why is this important?
+      description: Why is this important to you?
+      placeholder: Tell us what you see!
+      value: "A reason happened!"
+  - type: textarea
+    id: what-are-the-alternatives
+    attributes:
+      label: What are the alternatives?
+      description: What are the alternatives to this solution?
+      placeholder: Tell us what you see!
+      value: "An alternative happened!"
+  - type: textarea
+    id: what-is-the-impact
+    attributes:
+      label: What is the impact?
+      description: What is the impact of this solution?
+      placeholder: Tell us what you see!
+      value: "An impact happened!"
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Joffref/genz/blob/master/CODE_OF_CONDUCT.md
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
