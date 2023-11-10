@@ -20,7 +20,7 @@ func TestParseSuccess(t *testing.T) {
 		"basic struct": {
 			goCode: `
 			package main
-			
+
 			type A struct {}
 			`,
 			structName: "A",
@@ -32,7 +32,7 @@ func TestParseSuccess(t *testing.T) {
 		"struct with one attribute": {
 			goCode: `
 			package main
-			
+
 			type A struct {
 				foo string
 			}
@@ -52,7 +52,7 @@ func TestParseSuccess(t *testing.T) {
 		"struct with two attributes": {
 			goCode: `
 			package main
-			
+
 			type A struct {
 				foo string
 				bar uint
@@ -78,7 +78,7 @@ func TestParseSuccess(t *testing.T) {
 		"attribute with doc": {
 			goCode: `
 			package main
-			
+
 			type A struct {
 				//comment 1
 				//comment 2
@@ -100,7 +100,7 @@ func TestParseSuccess(t *testing.T) {
 		"attribute with inline comment": {
 			goCode: `
 			package main
-			
+
 			type A struct {
 				foo string // foo
 			}
@@ -113,6 +113,106 @@ func TestParseSuccess(t *testing.T) {
 						Name:     "foo",
 						Type:     "string",
 						Comments: []string{},
+					},
+				},
+			},
+		},
+		"one empty method, value receiver": {
+			goCode: `
+			package main
+
+			type A struct {}
+
+			func (a A) foo() {}
+			`,
+			structName: "A",
+			expectedStruct: parser.Struct{
+				Type:       parser.Type("A"),
+				Attributes: []parser.Attribute{},
+				Methods: []parser.Method{
+					{
+						Name:              "foo",
+						IsExported:        false,
+						IsPointerReceiver: false,
+						Params:            []parser.Type{},
+						Returns:           []parser.Type{},
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"one empty method, pointer receiver": {
+			goCode: `
+			package main
+
+			type A struct {}
+
+			func (a *A) foo() {}
+			`,
+			structName: "A",
+			expectedStruct: parser.Struct{
+				Type:       parser.Type("A"),
+				Attributes: []parser.Attribute{},
+				Methods: []parser.Method{
+					{
+						Name:              "foo",
+						IsExported:        false,
+						IsPointerReceiver: true,
+						Params:            []parser.Type{},
+						Returns:           []parser.Type{},
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"one method with 1 param and 1 return, value receiver": {
+			goCode: `
+			package main
+
+			type A struct {}
+
+			func (a A) foo(a string) int {
+				return 0
+			}
+			`,
+			structName: "A",
+			expectedStruct: parser.Struct{
+				Type:       parser.Type("A"),
+				Attributes: []parser.Attribute{},
+				Methods: []parser.Method{
+					{
+						Name:              "foo",
+						IsExported:        false,
+						IsPointerReceiver: false,
+						Params:            []parser.Type{"string"},
+						Returns:           []parser.Type{"int"},
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"one exported method with 2 params and 2 returns, pointer receiver": {
+			goCode: `
+			package main
+
+			type A struct {}
+
+			func (a *A) Foo(a string, b uint) (int, error) {
+				return 0
+			}
+			`,
+			structName: "A",
+			expectedStruct: parser.Struct{
+				Type:       parser.Type("A"),
+				Attributes: []parser.Attribute{},
+				Methods: []parser.Method{
+					{
+						Name:              "Foo",
+						IsExported:        true,
+						IsPointerReceiver: true,
+						Params:            []parser.Type{"string", "uint"},
+						Returns:           []parser.Type{"int", "error"},
+						Comments:          []string{},
 					},
 				},
 			},
