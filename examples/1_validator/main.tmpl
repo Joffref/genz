@@ -8,20 +8,17 @@ import (
 
 func (v {{ .Type }}) Validate() error {
 {{ range .Attributes }} {{$attribute := .}}
-  {{ if eq .Type "string" }}
-    {{ range .Comments }}
-      {{ if eq . "+optional" }}
+  {{ if eq .Type "string" }}{{ range .Comments }}
+  {{ if eq . "+required" }}
   if v.{{ $attribute.Name }} == "" {
     return fmt.Errorf("attribute '{{ $attribute.Name }}' must be set")
   }
-      {{ end }}
-      {{ if eq . "+startsWithCapital" }}
-  if v.{{ $attribute.Name }} == "" || !unicode.IsUpper(rune(v.{{ $attribute.Name }}[0])) {
+  {{ end }}
+  {{ if eq . "+startsWithCapital" }}
+  if v.{{ $attribute.Name }} != "" && !unicode.IsUpper(rune(v.{{ $attribute.Name }}[0])) {
     return fmt.Errorf("attribute '{{ $attribute.Name }}' should start with a capital letter")
   }
-      {{ end }}
-    {{ end }}
-  {{ end }}
+  {{ end }}{{ end }}{{ end }}
   {{ if eq .Type "int" "uint" "uint8" "uint32" "float32" "float64" }}
     // WORK IN PROGRESS
     {{ range .Comments }}
