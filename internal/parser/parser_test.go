@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Joffref/genz/internal/parser"
+	"github.com/google/go-cmp/cmp"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -131,7 +132,7 @@ func TestParseSuccess(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(gotStruct, tc.expectedStruct) {
-				t.Fatalf("expected %s, got %s", tc.expectedStruct, gotStruct)
+				t.Fatalf("output struct doesn't match expected:\n%s", cmp.Diff(gotStruct, tc.expectedStruct))
 			}
 		})
 	}
