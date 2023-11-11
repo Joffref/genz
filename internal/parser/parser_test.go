@@ -25,7 +25,7 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type:       parser.Type("A"),
+				Type:       parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{},
 			},
 		},
@@ -39,11 +39,11 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type: parser.Type("A"),
+				Type: parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{
 					{
 						Name:     "foo",
-						Type:     "string",
+						Type:     parser.Type{Name: "string"},
 						Comments: []string{},
 					},
 				},
@@ -60,16 +60,16 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type: parser.Type("A"),
+				Type: parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{
 					{
 						Name:     "foo",
-						Type:     "string",
+						Type:     parser.Type{Name: "string"},
 						Comments: []string{},
 					},
 					{
 						Name:     "bar",
-						Type:     "uint",
+						Type:     parser.Type{Name: "uint"},
 						Comments: []string{},
 					},
 				},
@@ -87,11 +87,11 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type: parser.Type("A"),
+				Type: parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{
 					{
 						Name:     "foo",
-						Type:     "string",
+						Type:     parser.Type{Name: "string"},
 						Comments: []string{"comment 1", "comment 2"},
 					},
 				},
@@ -107,11 +107,118 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type: parser.Type("A"),
+				Type: parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{
 					{
 						Name:     "foo",
-						Type:     "string",
+						Type:     parser.Type{Name: "string"},
+						Comments: []string{},
+					},
+				},
+			},
+		},
+		"attribute with a slice": {
+			goCode: `
+			package main
+
+			type B struct {
+				foo []string
+			}
+			`,
+			structName: "B",
+			expectedStruct: parser.Struct{
+				Type: parser.Type{Name: "B"},
+				Attributes: []parser.Attribute{
+					{
+						Name:     "foo",
+						Type:     parser.Type{Name: "[]string"},
+						Comments: []string{},
+					},
+				},
+			},
+		},
+		"attribute with named type": {
+			goCode: `
+			package main
+
+			type A struct {}
+			type B struct {
+				foo A
+			}
+			`,
+			structName: "B",
+			expectedStruct: parser.Struct{
+				Type: parser.Type{Name: "B"},
+				Attributes: []parser.Attribute{
+					{
+						Name:     "foo",
+						Type:     parser.Type{Name: "A"},
+						Comments: []string{},
+					},
+				},
+			},
+		},
+		"attribute with a slice of named type": {
+			goCode: `
+			package main
+
+			type A struct {}
+			type B struct {
+				foo []A
+			}
+			`,
+			structName: "B",
+			expectedStruct: parser.Struct{
+				Type: parser.Type{Name: "B"},
+				Attributes: []parser.Attribute{
+					{
+						Name:     "foo",
+						Type:     parser.Type{Name: "[]A"},
+						Comments: []string{},
+					},
+				},
+			},
+		},
+		"attribute with a map of named type": {
+			goCode: `
+			package main
+
+			type A struct {}
+			type B struct {
+				foo map[A]A
+			}
+			`,
+			structName: "B",
+			expectedStruct: parser.Struct{
+				Type: parser.Type{Name: "B"},
+				Attributes: []parser.Attribute{
+					{
+						Name:     "foo",
+						Type:     parser.Type{Name: "map[A]A"},
+						Comments: []string{},
+					},
+				},
+			},
+		},
+		"attribute with a struct containing named type": {
+			goCode: `
+			package main
+
+			type A struct {}
+			type B struct {
+				foo struct {
+					bar []A
+					baz string
+				}
+			}
+			`,
+			structName: "B",
+			expectedStruct: parser.Struct{
+				Type: parser.Type{Name: "B"},
+				Attributes: []parser.Attribute{
+					{
+						Name:     "foo",
+						Type:     parser.Type{Name: "struct{bar []A; baz string}"},
 						Comments: []string{},
 					},
 				},
@@ -127,7 +234,7 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type:       parser.Type("A"),
+				Type:       parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{},
 				Methods: []parser.Method{
 					{
@@ -151,7 +258,7 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type:       parser.Type("A"),
+				Type:       parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{},
 				Methods: []parser.Method{
 					{
@@ -177,15 +284,69 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type:       parser.Type("A"),
+				Type:       parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{},
 				Methods: []parser.Method{
 					{
 						Name:              "foo",
 						IsExported:        false,
 						IsPointerReceiver: false,
-						Params:            []parser.Type{"string"},
-						Returns:           []parser.Type{"int"},
+						Params:            []parser.Type{{Name: "string"}},
+						Returns:           []parser.Type{{Name: "int"}},
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"one method with 1 param and 1 return, named type": {
+			goCode: `
+			package main
+
+			type T struct {}
+			type A struct {}
+
+			func (a A) foo(a T) T {
+				return 0
+			}
+			`,
+			structName: "A",
+			expectedStruct: parser.Struct{
+				Type:       parser.Type{Name: "A"},
+				Attributes: []parser.Attribute{},
+				Methods: []parser.Method{
+					{
+						Name:              "foo",
+						IsExported:        false,
+						IsPointerReceiver: false,
+						Params:            []parser.Type{{Name: "T"}},
+						Returns:           []parser.Type{{Name: "T"}},
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"one method with 1 param and 1 return, complex named type": {
+			goCode: `
+			package main
+
+			type T struct {}
+			type A struct {}
+
+			func (a A) foo(a map[T]T) struct{name T} {
+				return 0
+			}
+			`,
+			structName: "A",
+			expectedStruct: parser.Struct{
+				Type:       parser.Type{Name: "A"},
+				Attributes: []parser.Attribute{},
+				Methods: []parser.Method{
+					{
+						Name:              "foo",
+						IsExported:        false,
+						IsPointerReceiver: false,
+						Params:            []parser.Type{{Name: "map[T]T"}},
+						Returns:           []parser.Type{{Name: "struct{name T}"}},
 						Comments:          []string{},
 					},
 				},
@@ -203,15 +364,15 @@ func TestParseSuccess(t *testing.T) {
 			`,
 			structName: "A",
 			expectedStruct: parser.Struct{
-				Type:       parser.Type("A"),
+				Type:       parser.Type{Name: "A"},
 				Attributes: []parser.Attribute{},
 				Methods: []parser.Method{
 					{
 						Name:              "Foo",
 						IsExported:        true,
 						IsPointerReceiver: true,
-						Params:            []parser.Type{"string", "uint"},
-						Returns:           []parser.Type{"int", "error"},
+						Params:            []parser.Type{{Name: "string"}, {Name: "uint"}},
+						Returns:           []parser.Type{{Name: "int"}, {Name: "error"}},
 						Comments:          []string{},
 					},
 				},

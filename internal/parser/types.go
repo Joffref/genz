@@ -25,5 +25,7 @@ type (
 		Comments []string
 	}
 
-	Type string
+	Type struct {
+		Name string
+	}
 )

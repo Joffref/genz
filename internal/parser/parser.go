@@ -9,7 +9,7 @@ import (
 )
 
 func Parse(pkg *packages.Package, structName string) (Struct, error) {
-	parsedStruct := Struct{Type: Type(structName)}
+	parsedStruct := Struct{Type: Type{Name: structName}}
 	found := false
 	for ident := range pkg.TypesInfo.Defs {
 		if ident.Name == structName {
@@ -84,7 +84,7 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []Attri
 
 		attributes[i] = Attribute{
 			Name:     field.Names[0].Name,
-			Type:     Type(typesInfo.TypeOf(field.Type).String()),
+			Type:     parseType(typesInfo.TypeOf(field.Type)),
 			Comments: comments,
 		}
 	}
@@ -106,7 +106,7 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 		if signature.Params() != nil {
 			params = make([]Type, signature.Params().Len())
 			for j := 0; j < signature.Params().Len(); j++ {
-				params[j] = Type(signature.Params().At(j).Type().String())
+				params[j] = parseType(signature.Params().At(j).Type())
 			}
 		}
 
@@ -114,7 +114,7 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 		if signature.Results() != nil {
 			returns = make([]Type, signature.Results().Len())
 			for j := 0; j < signature.Results().Len(); j++ {
-				returns[j] = Type(signature.Results().At(j).Type().String())
+				returns[j] = parseType(signature.Results().At(j).Type())
 			}
 		}
 
@@ -131,4 +131,10 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 	}
 
 	return methods, nil
+}
+
+func parseType(t types.Type) Type {
+	// Override the default type stringifier by removing the package path prefix
+	noPackageQualifier := func(p *types.Package) string { return "" }
+	return Type{Name: types.TypeString(t, noPackageQualifier)}
 }
