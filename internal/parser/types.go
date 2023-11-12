@@ -26,6 +26,16 @@ type (
 	}
 
 	Type struct {
+
+		// Name of the type from outside its package
+		// Example `uuid.UUID` or `time.Time`
+		// Use this variable if you generate code outside the package of that type
+		// Do not forget to add corresponding imports in your template
 		Name string
+
+		// Name of the type from inside its package
+		// Example `UUID` or `Time`
+		// Use this variable if you generate code inside the package of that type
+		InternalName string
 	}
 )

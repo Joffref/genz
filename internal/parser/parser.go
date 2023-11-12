@@ -9,7 +9,13 @@ import (
 )
 
 func Parse(pkg *packages.Package, structName string) (Struct, error) {
-	parsedStruct := Struct{Type: Type{Name: structName}}
+	parsedStruct := Struct{
+		Type: Type{
+			Name:         fmt.Sprintf("%s.%s", pkg.Name, structName),
+			InternalName: structName,
+		},
+	}
+
 	found := false
 	for ident := range pkg.TypesInfo.Defs {
 		if ident.Name == structName {
@@ -134,7 +140,19 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 }
 
 func parseType(t types.Type) Type {
-	// Override the default type stringifier by removing the package path prefix
-	noPackageQualifier := func(p *types.Package) string { return "" }
-	return Type{Name: types.TypeString(t, noPackageQualifier)}
+	// Remove every qualifier before the type name
+	// transforming "github.com/google/uuid.UUID" into "UUID"
+	noPackageQualifier := func(_ *types.Package) string { return "" }
+
+	// Adds the package name qualifier before the type name
+	// transforming "github.com/google/uuid.UUID" into "uuid.UUID"
+	packageNameQualifier := func(pkg *types.Package) string {
+		return pkg.Name()
+	}
+
+	return Type{
+		Name:         types.TypeString(t, packageNameQualifier), // (e.g. "uuid.UUID")
+		InternalName: types.TypeString(t, noPackageQualifier),   // (e.g. "UUID")
+	}
+
 }
