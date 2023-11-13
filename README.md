@@ -38,7 +38,7 @@ cd genz
 make install
 ```
 
-## Usage
+## Getting Started
 
 Here is a simple example of how to use GenZ.
 
