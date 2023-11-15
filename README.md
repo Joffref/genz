@@ -4,20 +4,18 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Joffref/genz)](https://goreportcard.com/report/github.com/Joffref/genz)
 [![License](https://img.shields.io/github/license/Joffref/genz)](LICENSE)
 ![GitHub stars](https://img.shields.io/github/stars/Joffref/genz)
-> At this moment, this project is in development. It is not ready for production use.
-> Refers to the [Roadmap](#roadmap) section for more information on what has been done.
->
-> See the [Contributing](#contributing) section if you would like to help make it better.
 
+> At this moment, this project is in development. It is not ready for production use. See the [Contributing](#contributing) section if you would like to help make it better.
 
-<p align="center" width="100%">
-    <img width="50%" src="./docs/assets/logo_500_500.png"> 
-</p>
-
-GenZ is your all-in-one opinionated code generator for Go. It leverages the power of Go templates to generate code from your own templates.
+✨ Never write toil/boilerplate code again! ✨
 
 Thanks to GenZ, you can generate code for your own needs, without having to write a single line of code.
 
+<p align="center" heigth="50%">
+    <img heigth="50%" src="./docs/assets/logo_500_500.png"> 
+</p>
+
+GenZ is a template-based generator for Go. A single binary that can be called with the native `go generate` to automate generation of your Go code based on templates.
 
 ## Installation
 
@@ -40,11 +38,21 @@ make install
 
 ## Getting Started
 
-Here is a simple example of how to use GenZ.
+Let's say you have several types defined in your project (such as `Human` as defined below).
+```go
+package main
 
-### Go
+type Human struct {
+	// +required
+	Firstname string
+	// +required
+	Lastname string
+	Age uint
+}
+```
+And you want to add a `Validate()` method on these type.
 
-Let say you have a `main.tmpl` file in your project, with the following content:
+With GenZ, all you have to do is to write a template once:
 ```gotemplate
 package main
 
@@ -63,30 +71,12 @@ func (v {{ .Type }}) Validate() error {
     return nil
 }
 ```
-And the following `human.go` file:
-```go
-package main
+And generate the associated Go code tied to your type :
 
-type Human struct {
-	// +required
-	Firstname string
-	// +required
-	Lastname string
-	Age uint
-}
-```
+1. Add `//go:generate genz -type Human -template validator.tmpl -output human.gen.go` on your go code.
+2. Call `go generate ./...`
 
-You can generate a `human.gen.go` file with the following command:
-```bash
-genz -type Human -template main.tmpl -output human.gen.go
-```
-
-or using the `go generate` command:
-```go
-//go:generate genz -type Human -template main.tmpl -output human.gen.go
-```
-
-The generated file will look like this:
+And your validator is generated :sparkles:
 ```go
 package main
 
@@ -105,6 +95,10 @@ func (v Human) Validate() error {
 }
 ```
 
+Checkout other examples in [/examples](/examples) folder.
+
+## Try it out
+Explore built-in `examples`, clone repo, and run `go generate ./...` in the root
 
 ### CLI
 ```bash
@@ -133,7 +127,3 @@ This project is licensed under the Apache 2.0 - see the [LICENSE](LICENSE) file 
 ## Code of Conduct
 
 This project is governed by the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
-
-## Roadmap
-
-- TBD
