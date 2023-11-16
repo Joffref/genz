@@ -6,10 +6,11 @@ import (
   "unicode"
 )
 
-func (v {{ .Type }}) Validate() error {
+func (v {{ .Type.InternalName }}) Validate() error {
 {{ range .Attributes }} {{$attribute := .}}
-  {{ if eq .Type "string" }}{{ range .Comments }}
-  {{ if eq . "+required" }}
+  {{ if eq .Type.InternalName "string" }}
+    {{ range .Comments }}
+      {{ if eq . "+required" }}
   if v.{{ $attribute.Name }} == "" {
     return fmt.Errorf("attribute '{{ $attribute.Name }}' must be set")
   }
@@ -18,8 +19,10 @@ func (v {{ .Type }}) Validate() error {
   if v.{{ $attribute.Name }} != "" && !unicode.IsUpper(rune(v.{{ $attribute.Name }}[0])) {
     return fmt.Errorf("attribute '{{ $attribute.Name }}' should start with a capital letter")
   }
-  {{ end }}{{ end }}{{ end }}
-  {{ if eq .Type "int" "uint" "uint8" "uint32" "float32" "float64" }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ if eq .Type.InternalName "int" "uint" "uint8" "uint32" "float32" "float64" }}
     // WORK IN PROGRESS
     {{ range .Comments }}
     {{ $comparators := split "," . }}
