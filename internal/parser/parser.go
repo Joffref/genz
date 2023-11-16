@@ -9,7 +9,13 @@ import (
 )
 
 func Parse(pkg *packages.Package, structName string) (Struct, error) {
-	parsedStruct := Struct{Type: Type(structName)}
+	parsedStruct := Struct{
+		Type: Type{
+			Name:         fmt.Sprintf("%s.%s", pkg.Name, structName),
+			InternalName: structName,
+		},
+	}
+
 	found := false
 	for ident := range pkg.TypesInfo.Defs {
 		if ident.Name == structName {
@@ -84,7 +90,7 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []Attri
 
 		attributes[i] = Attribute{
 			Name:     field.Names[0].Name,
-			Type:     Type(typesInfo.TypeOf(field.Type).String()),
+			Type:     parseType(typesInfo.TypeOf(field.Type)),
 			Comments: comments,
 		}
 	}
@@ -106,7 +112,7 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 		if signature.Params() != nil {
 			params = make([]Type, signature.Params().Len())
 			for j := 0; j < signature.Params().Len(); j++ {
-				params[j] = Type(signature.Params().At(j).Type().String())
+				params[j] = parseType(signature.Params().At(j).Type())
 			}
 		}
 
@@ -114,7 +120,7 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 		if signature.Results() != nil {
 			returns = make([]Type, signature.Results().Len())
 			for j := 0; j < signature.Results().Len(); j++ {
-				returns[j] = Type(signature.Results().At(j).Type().String())
+				returns[j] = parseType(signature.Results().At(j).Type())
 			}
 		}
 
@@ -131,4 +137,22 @@ func structMethods(namedType *types.Named) ([]Method, error) {
 	}
 
 	return methods, nil
+}
+
+func parseType(t types.Type) Type {
+	// Remove every qualifier before the type name
+	// transforming "github.com/google/uuid.UUID" into "UUID"
+	noPackageQualifier := func(_ *types.Package) string { return "" }
+
+	// Adds the package name qualifier before the type name
+	// transforming "github.com/google/uuid.UUID" into "uuid.UUID"
+	packageNameQualifier := func(pkg *types.Package) string {
+		return pkg.Name()
+	}
+
+	return Type{
+		Name:         types.TypeString(t, packageNameQualifier), // (e.g. "uuid.UUID")
+		InternalName: types.TypeString(t, noPackageQualifier),   // (e.g. "UUID")
+	}
+
 }

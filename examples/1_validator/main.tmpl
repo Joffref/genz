@@ -6,9 +6,9 @@ import (
   "unicode"
 )
 
-func (v {{ .Type }}) Validate() error {
+func (v {{ .Type.InternalName }}) Validate() error {
 {{ range .Attributes }} {{$attribute := .}}
-  {{ if eq .Type "string" }}
+  {{ if eq .Type.InternalName "string" }}
     {{ range .Comments }}
       {{ if eq . "+optional" }}
   if v.{{ $attribute.Name }} == "" {
@@ -22,7 +22,7 @@ func (v {{ .Type }}) Validate() error {
       {{ end }}
     {{ end }}
   {{ end }}
-  {{ if eq .Type "int" "uint" "uint8" "uint32" "float32" "float64" }}
+  {{ if eq .Type.InternalName "int" "uint" "uint8" "uint32" "float32" "float64" }}
     // WORK IN PROGRESS
     {{ range .Comments }}
     {{ $comparators := split "," . }}
