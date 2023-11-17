@@ -43,9 +43,9 @@ Let's say you have several types defined in your project (such as `Human` as def
 package main
 
 type Human struct {
-	// +required
+	//+required
 	Firstname string
-	// +required
+	//+required
 	Lastname string
 	Age uint
 }
