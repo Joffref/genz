@@ -60,7 +60,7 @@ import (
     "fmt"
 )
 
-func (v {{ .Type }}) Validate() error {
+func (v {{ .Type.InternalName }}) Validate() error {
 {{ range .Attributes }} {{$attribute := .}}
 {{ if eq .Type "string" }}{{ range .Comments }}
 {{ if eq . "+required" }}
