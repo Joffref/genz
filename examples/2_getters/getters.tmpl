@@ -1,0 +1,9 @@
+package test
+
+{{ range .Attributes }}
+  {{ if has "+getter" .Comments }}{{ $receiverName := substr 0 1 $.Type.InternalName | lower}}
+func ({{ $receiverName }} *{{ $.Type.InternalName }}) Get{{ camelcase .Name }}() {{ .Type.InternalName }} {
+  return {{ $receiverName }}.{{.Name}}
+}
+  {{ end }}
+{{ end }}
