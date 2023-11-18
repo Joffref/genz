@@ -3,10 +3,10 @@ package genz
 import (
 	"flag"
 	"fmt"
-    "io"
+	"io"
 	"log"
 	"net/http"
-    "net/url"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,11 +27,11 @@ Flags:`
 )
 
 var (
-	generateCmd  = flag.NewFlagSet("", flag.ExitOnError)
-	typeNames    = generateCmd.String("type", "", "comma-separated list of type names; must be set")
+	generateCmd      = flag.NewFlagSet("", flag.ExitOnError)
+	typeNames        = generateCmd.String("type", "", "comma-separated list of type names; must be set")
 	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
-	output       = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
-	buildTags    = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
+	output           = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
+	buildTags        = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
 )
 
 func init() {
@@ -71,7 +71,7 @@ func (c generateCommand) Run() error {
 	}
 
 	var template []byte
-    if url, _ := url.ParseRequestURI(*templateLocation); url != nil {
+	if url, _ := url.ParseRequestURI(*templateLocation); url != nil {
 		response, err := http.Get(*templateLocation)
 		if err != nil {
 			return fmt.Errorf("failed to make a request to %s: %v", *templateLocation, err)
