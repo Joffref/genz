@@ -5,7 +5,7 @@ type Human struct {
 	//+startsWithCapital
 	Firstname string
 
-	//+optional
+	//+required
 	//+startsWithCapital
 	Lastname string
 
