@@ -24,13 +24,13 @@ We strongly recommend using the Go version for production use.
 
 ### Using Go - Production
 
-```bash
+```shell
 go install github.com/Joffref/genz
 ```
 
 ### From source - Development
 
-```bash
+```shell
 git clone https://github.com/Joffref/genz.git
 cd genz
 make install
@@ -53,7 +53,7 @@ type Human struct {
 And you want to add a `Validate()` method on these type.
 
 With GenZ, all you have to do is to write a template once:
-```gotemplate
+```mustache
 package main
 
 import (
@@ -61,8 +61,8 @@ import (
 )
 
 func (v {{ .Type.InternalName }}) Validate() error {
-{{ range .Attributes }} {{$attribute := .}}
-{{ if eq .Type "string" }}{{ range .Comments }}
+{{ range .Attributes }} {{ $attribute := . }}
+{{ if eq .Type.InternalName "string" }}{{ range .Comments }}
 {{ if eq . "+required" }}
     if v.{{ $attribute.Name }} == "" {
         return fmt.Errorf("attribute '{{ $attribute.Name }}' must be set")
