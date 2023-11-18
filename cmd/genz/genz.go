@@ -3,7 +3,7 @@ package genz
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+    "io"
 	"log"
 	"net/http"
     "net/url"
@@ -76,7 +76,7 @@ func (c generateCommand) Run() error {
 		if err != nil {
 			return fmt.Errorf("failed to make a request to %s: %v", *templateFile, err)
 		}
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 		if err != nil {
 			return fmt.Errorf("could not read body of remote template %s: %v", *templateFile, err)
 		}
