@@ -3,7 +3,10 @@ package genz
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,11 +27,11 @@ Flags:`
 )
 
 var (
-	generateCmd  = flag.NewFlagSet("", flag.ExitOnError)
-	typeNames    = generateCmd.String("type", "", "comma-separated list of type names; must be set")
-	templateFile = generateCmd.String("template", "", "go-template file name")
-	output       = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
-	buildTags    = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
+	generateCmd      = flag.NewFlagSet("", flag.ExitOnError)
+	typeNames        = generateCmd.String("type", "", "comma-separated list of type names; must be set")
+	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
+	output           = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
+	buildTags        = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
 )
 
 func init() {
@@ -47,7 +50,7 @@ func (c generateCommand) ValidateArgs() error {
 		generateCmd.Usage()
 		return fmt.Errorf("missing 'type' argument")
 	}
-	if len(*templateFile) == 0 {
+	if len(*templateLocation) == 0 {
 		generateCmd.Usage()
 		return fmt.Errorf("missing 'template' argument")
 	}
@@ -67,9 +70,23 @@ func (c generateCommand) Run() error {
 		tags = strings.Split(*buildTags, ",")
 	}
 
-	template, err := os.ReadFile(*templateFile)
-	if err != nil {
-		return fmt.Errorf("failed to read template file %s: %v", *templateFile, err)
+	var template []byte
+	if url, _ := url.ParseRequestURI(*templateLocation); url != nil {
+		response, err := http.Get(*templateLocation)
+		if err != nil {
+			return fmt.Errorf("failed to make a request to %s: %v", *templateLocation, err)
+		}
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			return fmt.Errorf("could not read body of remote template %s: %v", *templateLocation, err)
+		}
+		template = body
+	} else {
+		file, err := os.ReadFile(*templateLocation)
+		if err != nil {
+			return fmt.Errorf("failed to read template file %s: %v", *templateLocation, err)
+		}
+		template = file
 	}
 
 	// We accept either one directory or a list of files. Which do we have?
@@ -109,7 +126,7 @@ func (c generateCommand) Run() error {
 		outputName = filepath.Join(dir, strings.ToLower(baseName))
 	}
 
-	if err = os.WriteFile(outputName, src, 0644); err != nil {
+	if err := os.WriteFile(outputName, src, 0644); err != nil {
 		return fmt.Errorf("writing output: %s", err)
 	}
 
