@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+    "net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,7 +71,7 @@ func (c generateCommand) Run() error {
 	}
 
 	var template []byte
-	if strings.HasPrefix(*templateFile, "http://") || strings.HasPrefix(*templateFile, "https://") {
+    if url, _ := url.ParseRequestURI(*templateFile); url != nil {
 		response, err := http.Get(*templateFile)
 		if err != nil {
 			return fmt.Errorf("failed to make a request to %s: %v", *templateFile, err)
