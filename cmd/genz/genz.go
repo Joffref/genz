@@ -29,7 +29,7 @@ Flags:`
 var (
 	generateCmd  = flag.NewFlagSet("", flag.ExitOnError)
 	typeNames    = generateCmd.String("type", "", "comma-separated list of type names; must be set")
-	templateFile = generateCmd.String("template", "", "go-template file name")
+	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
 	output       = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
 	buildTags    = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
 )
@@ -50,7 +50,7 @@ func (c generateCommand) ValidateArgs() error {
 		generateCmd.Usage()
 		return fmt.Errorf("missing 'type' argument")
 	}
-	if len(*templateFile) == 0 {
+	if len(*templateLocation) == 0 {
 		generateCmd.Usage()
 		return fmt.Errorf("missing 'template' argument")
 	}
@@ -71,20 +71,20 @@ func (c generateCommand) Run() error {
 	}
 
 	var template []byte
-    if url, _ := url.ParseRequestURI(*templateFile); url != nil {
-		response, err := http.Get(*templateFile)
+    if url, _ := url.ParseRequestURI(*templateLocation); url != nil {
+		response, err := http.Get(*templateLocation)
 		if err != nil {
-			return fmt.Errorf("failed to make a request to %s: %v", *templateFile, err)
+			return fmt.Errorf("failed to make a request to %s: %v", *templateLocation, err)
 		}
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
-			return fmt.Errorf("could not read body of remote template %s: %v", *templateFile, err)
+			return fmt.Errorf("could not read body of remote template %s: %v", *templateLocation, err)
 		}
 		template = body
 	} else {
-		file, err := os.ReadFile(*templateFile)
+		file, err := os.ReadFile(*templateLocation)
 		if err != nil {
-			return fmt.Errorf("failed to read template file %s: %v", *templateFile, err)
+			return fmt.Errorf("failed to read template file %s: %v", *templateLocation, err)
 		}
 		template = file
 	}
