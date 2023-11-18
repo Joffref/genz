@@ -103,17 +103,17 @@ Explore built-in `examples`, clone repo, and run `go generate ./...` in the root
 ### CLI
 ```bash
 Usage of genz:
-        genz [flags] -type T -template foo.tmpl [directory]
-        genz [flags] -type T -template foo.tmpl files... # Must be a single package
+	genz [flags] -type T -template foo.tmpl [directory]
+	genz [flags] -type T -template foo.tmpl files... # Must be a single package
 Flags:
   -output string
-        output file name; default srcdir/<type>.gen.go
+    	output file name; default srcdir/<type>.gen.go
   -tags string
-        comma-separated list of build tags to apply
+    	comma-separated list of build tags to apply
   -template string
-        go-template file name
+    	go-template local or remote file
   -type string
-        comma-separated list of type names; must be set
+    	comma-separated list of type names; must be set
 ```
 
 ## Contributing
