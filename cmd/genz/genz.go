@@ -3,7 +3,9 @@ package genz
 import (
 	"flag"
 	"fmt"
+    "io/ioutil"
 	"log"
+    "net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -66,11 +68,25 @@ func (c generateCommand) Run() error {
 	if len(*buildTags) > 0 {
 		tags = strings.Split(*buildTags, ",")
 	}
-
-	template, err := os.ReadFile(*templateFile)
-	if err != nil {
-		return fmt.Errorf("failed to read template file %s: %v", *templateFile, err)
-	}
+    
+    var template []byte;
+    if strings.HasPrefix(*templateFile, "http://") || strings.HasPrefix(*templateFile, "https://") {
+        response, err := http.Get(*templateFile)
+    	if err != nil {
+    		return fmt.Errorf("failed to make a request to %s: %v", *templateFile, err)
+    	}
+        body, err := ioutil.ReadAll(response.Body)
+    	if err != nil {
+    		return fmt.Errorf("could not read body of remote template %s: %v", *templateFile, err)
+    	}
+        template = body
+    } else {
+        file, err := os.ReadFile(*templateFile)
+    	if err != nil {
+    		return fmt.Errorf("failed to read template file %s: %v", *templateFile, err)
+    	}
+        template = file;
+    }
 
 	// We accept either one directory or a list of files. Which do we have?
 	args := generateCmd.Args()
@@ -109,7 +125,7 @@ func (c generateCommand) Run() error {
 		outputName = filepath.Join(dir, strings.ToLower(baseName))
 	}
 
-	if err = os.WriteFile(outputName, src, 0644); err != nil {
+    if err := os.WriteFile(outputName, src, 0644); err != nil {
 		return fmt.Errorf("writing output: %s", err)
 	}
 
