@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -32,4 +33,33 @@ func IsDirectory(name string) bool {
 		log.Fatal(err)
 	}
 	return info.IsDir()
+}
+
+func AssertOutputIsEqual(expected, actual []byte, verbose bool) error {
+	if string(expected) != string(actual) {
+		if verbose {
+			log.Printf("expected.go:\n%s\n", string(expected))
+			log.Printf("generated file:\n%s\n", string(actual))
+		}
+		return fmt.Errorf("expected.go and generated file are different")
+	}
+	return nil
+}
+
+// RunCommand runs a command and returns an error if it fails.
+// If verbose is true, the command output is printed.
+func RunCommand(command []string, verbose bool) error {
+	cmd := exec.Command(command[0], command[1:]...)
+	if verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
+	if err := cmd.Run(); err != nil {
+		var commandStr string
+		for _, c := range command {
+			commandStr += c + " "
+		}
+		return fmt.Errorf("failed to run %s: %w", commandStr, err)
+	}
+	return nil
 }

@@ -28,5 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
       - run: make deps
       - run: make lint
-      - run: make test
+      - run: make test-coverage
       - run: make build
+      - run: make install
+      - run: make test-template
