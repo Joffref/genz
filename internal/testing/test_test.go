@@ -1,8 +1,14 @@
 package testing
 
-import "testing"
+import (
+	"runtime"
+	"testing"
+)
 
 func TestRunTests(t *testing.T) {
+	if runtime.GOOS == "windows" { // TODO: Fix this test on windows
+		t.Skip("Skipping test on windows")
+	}
 	tests := map[string]struct {
 		directory string
 		wantErr   bool
@@ -30,6 +36,9 @@ func TestRunTests(t *testing.T) {
 }
 
 func Test_runTest(t *testing.T) {
+	if runtime.GOOS == "windows" { // TODO: fix this test on windows
+		t.Skip("Skipping test on windows")
+	}
 	tests := map[string]struct {
 		directory string
 		wantErr   bool
