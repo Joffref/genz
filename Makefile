@@ -15,6 +15,13 @@ lint:
 test:
 	go test -v ./...
 
+test-coverage:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out
+
+test-examples:
+	$(BINARY_NAME) test -directory ./examples/ -v
+
 build-all:
 	for os in $(SUPPORTED_OS); do \
 		for arch in $(SUPPORTED_ARCH); do \
