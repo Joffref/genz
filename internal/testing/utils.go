@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"os"
-	"path"
 )
 
 // assertOutputIsEqual compares the expected and actual byte slices and returns an error if they are different.
@@ -19,9 +18,9 @@ func assertOutputIsEqual(expected, actual []byte, verbose bool) error {
 	return nil
 }
 
-func cleanUpGeneratedFiles(directory string, generatedFiles []string) error {
+func removeFiles(generatedFiles []string) error {
 	for _, f := range generatedFiles {
-		if err := os.Remove(path.Join(directory, f)); err != nil {
+		if err := os.Remove(f); err != nil {
 			return fmt.Errorf("failed to remove file %s: %w", f, err)
 		}
 	}

@@ -57,7 +57,7 @@ func runTest(directory string, verbose bool) error {
 	var generatedFiles []string
 	for _, f := range dir {
 		if strings.HasSuffix(f.Name(), ".gen.go") {
-			generatedFiles = append(generatedFiles, f.Name())
+			generatedFiles = append(generatedFiles, path.Join(directory, f.Name()))
 		}
 	}
 	if len(generatedFiles) == 0 {
@@ -65,17 +65,17 @@ func runTest(directory string, verbose bool) error {
 	}
 	if len(generatedFiles) > 1 {
 		var errs error
-		if err := cleanUpGeneratedFiles(directory, generatedFiles); err != nil {
+		if err := removeFiles(generatedFiles); err != nil {
 			errs = errors.Join(errs, err)
 		}
 		errs = errors.Join(errs, fmt.Errorf("too many generated files in directory %s\nAt the moment, GenZ only supports one generated file per directory for test ", directory))
 		return errs
 	}
-	actual, err := os.ReadFile(path.Join(directory, generatedFiles[0]))
+	actual, err := os.ReadFile(generatedFiles[0])
 	if err != nil {
 		return fmt.Errorf("failed to read generated file: %w", err)
 	}
-	if err := cleanUpGeneratedFiles(directory, generatedFiles); err != nil {
+	if err := removeFiles(generatedFiles); err != nil {
 		return err
 	}
 	if err := assertOutputIsEqual(expected, actual, verbose); err != nil {
