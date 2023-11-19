@@ -13,6 +13,7 @@ import (
 
 	"github.com/Joffref/genz/internal/command"
 	"github.com/Joffref/genz/internal/generator"
+	"github.com/Joffref/genz/internal/parser"
 	"github.com/Joffref/genz/internal/utils"
 )
 
@@ -28,7 +29,7 @@ Flags:`
 
 var (
 	generateCmd      = flag.NewFlagSet("", flag.ExitOnError)
-	typeNames        = generateCmd.String("type", "", "comma-separated list of type names; must be set")
+	typeName         = generateCmd.String("type", "", "name of the struct to parse")
 	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
 	output           = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
 	buildTags        = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
@@ -46,7 +47,7 @@ func init() {
 }
 
 func (c generateCommand) ValidateArgs() error {
-	if len(*typeNames) == 0 {
+	if len(*typeName) == 0 {
 		generateCmd.Usage()
 		return fmt.Errorf("missing 'type' argument")
 	}
@@ -62,9 +63,6 @@ func (c generateCommand) FlagSet() *flag.FlagSet {
 }
 
 func (c generateCommand) Run() error {
-
-	types := strings.Split(*typeNames, ",")
-
 	var tags []string
 	if len(*buildTags) > 0 {
 		tags = strings.Split(*buildTags, ",")
@@ -96,18 +94,17 @@ func (c generateCommand) Run() error {
 		args = []string{"."}
 	}
 
-	// Parse the package once.
-	g := generator.Generator{
-		Template: string(template),
-		Pkg:      utils.LoadPackage(args, tags),
+	buf, err := generator.Generate(
+		utils.LoadPackage(args, tags),
+		string(template),
+		*typeName,
+		parser.Parse,
+	)
+	if err != nil {
+		return err
 	}
 
-	// Run generate for each type.
-	for _, typeName := range types {
-		g.Generate(typeName)
-	}
-
-	src := g.Format()
+	src := generator.Format(buf)
 
 	var dir string
 	if len(args) == 1 && utils.IsDirectory(args[0]) {
@@ -122,7 +119,7 @@ func (c generateCommand) Run() error {
 	// Write to file.
 	outputName := *output
 	if outputName == "" {
-		baseName := fmt.Sprintf("%s.gen.go", types[0])
+		baseName := fmt.Sprintf("%s.gen.go", *typeName)
 		outputName = filepath.Join(dir, strings.ToLower(baseName))
 	}
 
