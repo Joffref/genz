@@ -19,7 +19,7 @@ test-coverage:
 	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out
 
-test-template:
+test-examples:
 	$(BINARY_NAME) test -directory ./examples/ -v
 
 build-all:

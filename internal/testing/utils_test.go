@@ -6,28 +6,24 @@ func TestAssertOutputIsEqual(t *testing.T) {
 	type args struct {
 		expected []byte
 		actual   []byte
-		verbose  bool
 	}
-	tests := []struct {
-		name    string
+	tests := map[string]struct {
 		args    args
 		wantErr bool
 	}{
-		{
-			name:    "Same content should not return an error",
-			args:    args{expected: []byte("foo"), actual: []byte("foo"), verbose: false},
+		"Same content should not return an error": {
+			args:    args{expected: []byte("foo"), actual: []byte("foo")},
 			wantErr: false,
 		},
-		{
-			name:    "Different content should return an error",
-			args:    args{expected: []byte("foo"), actual: []byte("bar"), verbose: false},
+		"Different content should return an error": {
+			args:    args{expected: []byte("foo"), actual: []byte("bar")},
 			wantErr: true,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := assertOutputIsEqual(tt.args.expected, tt.args.actual, tt.args.verbose); (err != nil) != tt.wantErr {
-				t.Errorf("assertOutputIsEqual() error = %v, wantErr %v", err, tt.wantErr)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if err := assertOutputIsEqual(tc.args.expected, tc.args.actual, false); (err != nil) != tc.wantErr {
+				t.Errorf("assertOutputIsEqual() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}

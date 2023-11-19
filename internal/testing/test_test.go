@@ -3,91 +3,70 @@ package testing
 import "testing"
 
 func TestRunTests(t *testing.T) {
-	type args struct {
-		directory   string
-		verbose     bool
-		exitOnError bool
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+	tests := map[string]struct {
+		directory string
+		wantErr   bool
 	}{
-		{
-			name:    "Non existing directory should return an error",
-			args:    args{directory: "", verbose: false, exitOnError: false},
-			wantErr: true,
+		"Non existing directory should return an error": {
+			directory: "",
+			wantErr:   true,
 		},
-		{
-			name:    "Directory with no expected.go file should not return an error",
-			args:    args{directory: "testdata/empty_directory", verbose: false, exitOnError: false},
-			wantErr: false,
+		"Directory with no expected.go file should not return an error": {
+			directory: "./testdata/empty_directory",
+			wantErr:   false,
 		},
-		{
-			name:    "Directory with expected.go file should not return an error",
-			args:    args{directory: "./testdata/accurate_expected", verbose: false, exitOnError: false},
-			wantErr: false,
+		"Directory with expected.go file should not return an error": {
+			directory: "./testdata/accurate_expected",
+			wantErr:   false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := RunTests(tt.args.directory, tt.args.verbose, tt.args.exitOnError); (err != nil) != tt.wantErr {
-				t.Errorf("RunTests() error = %v, wantErr %v", err, tt.wantErr)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if err := RunTests(tc.directory, false, false); (err != nil) != tc.wantErr {
+				t.Errorf("RunTests() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
 }
 
 func Test_runTest(t *testing.T) {
-	type args struct {
+	tests := map[string]struct {
 		directory string
-		verbose   bool
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		wantErr   bool
 	}{
-		{
-			name:    "Non existing directory should return an error",
-			args:    args{directory: "", verbose: false},
-			wantErr: true,
+		"Non existing directory should return an error": {
+			directory: "",
+			wantErr:   true,
 		},
-		{
-			name:    "Directory with no expected.go file should return an error",
-			args:    args{directory: "./testdata/empty_directory", verbose: false},
-			wantErr: true,
+		"Directory with no expected.go file should return an error": {
+			directory: "./testdata/empty_directory",
+			wantErr:   true,
 		},
-		{
-			name:    "Directory with expected.go and identical generated file should not return an error",
-			args:    args{directory: "./testdata/accurate_expected", verbose: false},
-			wantErr: false,
+		"Directory with expected.go and identical generated file should not return an error": {
+			directory: "./testdata/accurate_expected",
+			wantErr:   false,
 		},
-		{
-			name:    "Directory with two generated files should return an error",
-			args:    args{directory: "./testdata/two_generated_files", verbose: false},
-			wantErr: true,
+		"Directory with two generated files should return an error": {
+			directory: "./testdata/two_generated_files",
+			wantErr:   true,
 		},
-		{
-			name:    "Directory with difference between expected.go and generated file should return an error",
-			args:    args{directory: "./testdata/difference_with_expected", verbose: false},
-			wantErr: true,
+		"Directory with difference between expected.go and generated file should return an error": {
+			directory: "./testdata/inaccurate_expected",
+			wantErr:   true,
 		},
-		{
-			name:    "Directory with failing test should return an error",
-			args:    args{directory: "./testdata/failing_unit_test", verbose: false},
-			wantErr: true,
+		"Directory with failing test should return an error": {
+			directory: "./testdata/failing_unit_test",
+			wantErr:   true,
 		},
-		{
-			name:    "Directory with working test should not return an error",
-			args:    args{directory: "./testdata/passing_unit_test", verbose: false},
-			wantErr: false,
+		"Directory with working test should not return an error": {
+			directory: "./testdata/passing_unit_test",
+			wantErr:   false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := runTest(tt.args.directory, tt.args.verbose); (err != nil) != tt.wantErr {
-				t.Errorf("runTest() error = %v, wantErr %v", err, tt.wantErr)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if err := runTest(tc.directory, false); (err != nil) != tc.wantErr {
+				t.Errorf("runTest() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
