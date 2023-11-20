@@ -22,7 +22,7 @@ func TestAssertOutputIsEqual(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			if err := assertOutputIsEqual(tc.args.expected, tc.args.actual, false); (err != nil) != tc.wantErr {
+			if err := assertOutputIsEqual("", "", tc.args.expected, tc.args.actual, false); (err != nil) != tc.wantErr {
 				t.Errorf("assertOutputIsEqual() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})

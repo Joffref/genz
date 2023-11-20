@@ -26,7 +26,6 @@ func (t testCommand) FlagSet() *flag.FlagSet {
 }
 
 func (t testCommand) Run() error {
-	log.Printf("genz test %s\n", *directory)
 	return testing.RunTests(*directory, *verbose, *exitOnErr)
 }
 
