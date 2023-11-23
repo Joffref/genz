@@ -24,7 +24,7 @@ func RunTests(directory string, verbose, exitOnError bool) error {
 		if f.Name() == "expected.go" {
 			log.Printf("=== ☶ - Running test in %s ===\n", directory)
 			if err := runTest(directory, verbose); err != nil {
-				log.Printf(err.Error())
+				log.Print(err.Error())
 				log.Printf("=== ✘ - End of test in %s with error ===\n\n\n", directory)
 				return err
 			}
