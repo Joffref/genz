@@ -26,8 +26,8 @@ func (t testCommand) FlagSet() *flag.FlagSet {
 }
 
 func (t testCommand) Run() error {
-	log.Printf("genz test %s\n", *directory)
-	return testing.RunTests(*directory, *verbose, *exitOnErr)
+	_ = testing.RunTests(*directory, *verbose, *exitOnErr) // We don't care about the error as it is already logged
+	return nil
 }
 
 func (t testCommand) ValidateArgs() error {

@@ -3,17 +3,24 @@ package testing
 import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
+	"log"
 	"os"
 )
 
 // assertOutputIsEqual compares the expected and actual byte slices and returns an error if they are different.
 // If verbose is true, the output is printed. This is useful for debugging.
-func assertOutputIsEqual(expected, actual []byte, verbose bool) error {
+func assertOutputIsEqual(expectedFileName, actualFileName string, expected, actual []byte, verbose bool) error {
+	if verbose {
+		log.Printf("Comparing %s and %s\n", expectedFileName, actualFileName)
+	}
 	if string(expected) != string(actual) {
 		if verbose {
-			return fmt.Errorf("Difference between expected.go and generated file:\n%s\n", cmp.Diff(expected, actual))
+			return fmt.Errorf("Difference between %s and %s:\n%s", expectedFileName, actualFileName, cmp.Diff(string(expected), string(actual)))
 		}
-		return fmt.Errorf("expected.go and generated file are different")
+		return fmt.Errorf("Difference between %s and %s:\n", expectedFileName, actualFileName)
+	}
+	if verbose {
+		log.Printf("No difference between %s and %s\n", expectedFileName, actualFileName)
 	}
 	return nil
 }

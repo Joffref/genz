@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Joffref/genz/internal/utils"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -21,9 +22,13 @@ func RunTests(directory string, verbose, exitOnError bool) error {
 			continue
 		}
 		if f.Name() == "expected.go" {
+			log.Printf("=== ☶ - Running test in %s ===\n", directory)
 			if err := runTest(directory, verbose); err != nil {
+				log.Print(err.Error())
+				log.Printf("=== ✘ - End of test in %s with error ===\n\n\n", directory)
 				return err
 			}
+			log.Printf("=== ✔ - End of test in %s without error ===\n\n\n", directory)
 		}
 	}
 	var errs error
@@ -33,6 +38,7 @@ func RunTests(directory string, verbose, exitOnError bool) error {
 				return err
 			}
 			errs = errors.Join(errs, err)
+			continue
 		}
 	}
 	return errs
@@ -78,8 +84,17 @@ func runTest(directory string, verbose bool) error {
 	if err := removeFiles(generatedFiles); err != nil {
 		return err
 	}
-	if err := assertOutputIsEqual(expected, actual, verbose); err != nil {
+	if err := assertOutputIsEqual("expected.go", generatedFiles[0], expected, actual, verbose); err != nil {
 		return err
 	}
-	return utils.RunCommand([]string{"go", "test", "-v", fmt.Sprintf("./%s", directory)}, verbose)
+	if verbose {
+		log.Printf("Running go test in %s\n", directory)
+	}
+	if err := utils.RunCommand([]string{"go", "test", "-v", fmt.Sprintf("./%s", directory)}, verbose); err != nil {
+		return err
+	}
+	if verbose {
+		log.Printf("All tests passed in %s\n", directory)
+	}
+	return nil
 }
