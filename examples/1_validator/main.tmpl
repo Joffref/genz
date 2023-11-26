@@ -26,7 +26,6 @@ func (v {{ .Type.InternalName }}) Validate() error {
     // WORK IN PROGRESS
     {{ range .Comments }}
     {{ $comparators := split "," . }}
-    // {{ $comparators }}
     {{ end }}
   {{ end }}
 {{ end }}

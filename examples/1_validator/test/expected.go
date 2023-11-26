@@ -22,7 +22,5 @@ func (v Human) Validate() error {
 
 	// WORK IN PROGRESS
 
-	// map[_0:+>18 _1:<99]
-
 	return nil
 }
