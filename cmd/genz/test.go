@@ -2,6 +2,7 @@ package genz
 
 import (
 	"flag"
+	"fmt"
 	"github.com/Joffref/genz/internal/command"
 	"github.com/Joffref/genz/internal/testing"
 	"log"
@@ -26,7 +27,9 @@ func (t testCommand) FlagSet() *flag.FlagSet {
 }
 
 func (t testCommand) Run() error {
-	_ = testing.RunTests(*directory, *verbose, *exitOnErr) // We don't care about the error as it is already logged
+	if err := testing.RunTests(*directory, *verbose, *exitOnErr); err != nil {
+		return fmt.Errorf("test(s) exited with error(s)")
+	}
 	return nil
 }
 
