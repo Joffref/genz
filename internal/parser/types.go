@@ -38,4 +38,11 @@ type (
 		// Use this variable if you generate code inside the package of that type
 		InternalName string
 	}
+
+	Interface struct {
+		Type Type
+
+		Methods  []Method
+		Comments []string
+	}
 )

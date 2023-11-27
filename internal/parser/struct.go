@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func Parse(pkg *packages.Package, structName string) (Struct, error) {
+func ParseStruct(pkg *packages.Package, structName string) (interface{}, error) {
 	parsedStruct := Struct{
 		Type: Type{
 			Name:         fmt.Sprintf("%s.%s", pkg.Name, structName),

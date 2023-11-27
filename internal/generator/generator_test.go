@@ -12,7 +12,7 @@ import (
 )
 
 func TestGenerateErrorParse(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.Struct, error) {
+	parseFunc := func(pkg *packages.Package, structName string) (interface{}, error) {
 		return parser.Struct{}, errors.New("failed to parse package")
 	}
 	_, err := generator.Generate(nil, "template", "typeName", parseFunc)
@@ -25,7 +25,7 @@ func TestGenerateErrorParse(t *testing.T) {
 }
 
 func TestGenerateErrorTemplateParse(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.Struct, error) {
+	parseFunc := func(pkg *packages.Package, structName string) (interface{}, error) {
 		return parser.Struct{}, nil
 	}
 	_, err := generator.Generate(nil, "{{", "typeName", parseFunc)
@@ -38,7 +38,7 @@ func TestGenerateErrorTemplateParse(t *testing.T) {
 }
 
 func TestGenerateErrorTemplateExecute(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.Struct, error) {
+	parseFunc := func(pkg *packages.Package, structName string) (interface{}, error) {
 		return parser.Struct{}, nil
 	}
 	_, err := generator.Generate(nil, "{{.Foo}}", "typeName", parseFunc)
@@ -51,7 +51,7 @@ func TestGenerateErrorTemplateExecute(t *testing.T) {
 }
 
 func TestGenerateSuccess(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.Struct, error) {
+	parseFunc := func(pkg *packages.Package, structName string) (interface{}, error) {
 		return parser.Struct{
 			Type: parser.Type{
 				Name: "TypeName",

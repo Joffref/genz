@@ -3,6 +3,7 @@ package genz
 import (
 	"flag"
 	"fmt"
+	"github.com/Joffref/genz/internal/parser"
 	"io"
 	"log"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/Joffref/genz/internal/command"
 	"github.com/Joffref/genz/internal/generator"
-	"github.com/Joffref/genz/internal/parser"
 	"github.com/Joffref/genz/internal/utils"
 )
 
@@ -29,7 +29,8 @@ Flags:`
 
 var (
 	generateCmd      = flag.NewFlagSet("", flag.ExitOnError)
-	typeName         = generateCmd.String("type", "", "name of the struct to parse")
+	typeKind         = generateCmd.String("kind", "struct", "kind of type to parse")
+	typeName         = generateCmd.String("type", "", "name of the type to parse")
 	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
 	output           = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
 	buildTags        = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
@@ -93,12 +94,18 @@ func (c generateCommand) Run() error {
 		// Default: process whole package in current directory.
 		args = []string{"."}
 	}
-
+	var parseFunc generator.ParseFunc
+	switch *typeKind {
+	case "struct":
+		parseFunc = parser.ParseStruct
+	case "interface":
+		parseFunc = parser.ParseInterface
+	}
 	buf, err := generator.Generate(
 		utils.LoadPackage(args, tags),
 		string(template),
 		*typeName,
-		parser.Parse,
+		parseFunc,
 	)
 	if err != nil {
 		return err

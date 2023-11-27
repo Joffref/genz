@@ -1,17 +1,15 @@
 package parser_test
 
 import (
-	"os"
-	"path"
+	"github.com/Joffref/genz/internal/utils"
 	"reflect"
 	"testing"
 
 	"github.com/Joffref/genz/internal/parser"
 	"github.com/google/go-cmp/cmp"
-	"golang.org/x/tools/go/packages"
 )
 
-func TestParseSuccess(t *testing.T) {
+func TestParseStructSuccess(t *testing.T) {
 	testCases := map[string]struct {
 		goCode         string
 		structName     string
@@ -428,9 +426,9 @@ func TestParseSuccess(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			pkg := createPkgWithCode(t, tc.goCode)
+			pkg := utils.CreatePkgWithCode(t, tc.goCode)
 
-			gotStruct, err := parser.Parse(pkg, tc.structName)
+			gotStruct, err := parser.ParseStruct(pkg, tc.structName)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -440,25 +438,4 @@ func TestParseSuccess(t *testing.T) {
 			}
 		})
 	}
-}
-
-func createPkgWithCode(t *testing.T, goCode string) *packages.Package {
-	t.Helper()
-
-	tmp := t.TempDir()
-	err := os.WriteFile(path.Join(tmp, "main.go"), []byte(goCode), 0644)
-	if err != nil {
-		t.Fatalf("failed while writing file: %v", err)
-	}
-
-	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax, Tests: false}
-	pkgs, err := packages.Load(cfg, path.Join(tmp, "main.go"))
-	if err != nil {
-		t.Fatalf("failed to load package: %v", err)
-	}
-	if len(pkgs) != 1 {
-		t.Fatalf("expected 1 package, got %d", len(pkgs))
-	}
-
-	return pkgs[0]
 }

@@ -8,18 +8,17 @@ import (
 	"html/template"
 	"log"
 
-	"github.com/Joffref/genz/internal/parser"
 	"github.com/Masterminds/sprig/v3"
 	"golang.org/x/tools/go/packages"
 )
 
-type parseFunc func(pkg *packages.Package, structName string) (parser.Struct, error)
+type ParseFunc func(pkg *packages.Package, structName string) (interface{}, error)
 
 func Generate(
 	pkg *packages.Package,
 	templateContent string,
 	typeName string,
-	parse parseFunc,
+	parse ParseFunc,
 ) (bytes.Buffer, error) {
 	log.Printf("generating template for type %s", typeName)
 
