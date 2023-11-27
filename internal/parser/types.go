@@ -1,7 +1,7 @@
 package parser
 
 type (
-	Struct struct {
+	Element struct {
 		Type Type
 
 		Attributes []Attribute
@@ -42,7 +42,12 @@ type (
 	Interface struct {
 		Type Type
 
-		Methods  []Method
-		Comments []string
+		Methods []Method
+	}
+
+	ParsedElement struct {
+		PackageName    string
+		PackageImports []string
+		Element
 	}
 )

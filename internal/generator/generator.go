@@ -4,6 +4,7 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"github.com/Joffref/genz/internal/parser"
 	"go/format"
 	"html/template"
 	"log"
@@ -12,7 +13,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-type ParseFunc func(pkg *packages.Package, structName string) (interface{}, error)
+type ParseFunc func(pkg *packages.Package, typeName string) (parser.ParsedElement, error)
 
 func Generate(
 	pkg *packages.Package,
@@ -22,7 +23,7 @@ func Generate(
 ) (bytes.Buffer, error) {
 	log.Printf("generating template for type %s", typeName)
 
-	parsedType, err := parse(pkg, typeName)
+	parsedElement, err := parse(pkg, typeName)
 	if err != nil {
 		return bytes.Buffer{}, fmt.Errorf("failed to inspect package: %v", err)
 	}
@@ -32,7 +33,7 @@ func Generate(
 		return bytes.Buffer{}, fmt.Errorf("failed to parse template: %v", err)
 	}
 	buf := bytes.Buffer{}
-	err = tmpl.Execute(&buf, parsedType)
+	err = tmpl.Execute(&buf, parsedElement)
 	if err != nil {
 		return bytes.Buffer{}, fmt.Errorf("failed to execute template: %v", err)
 	}

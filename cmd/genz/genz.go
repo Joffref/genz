@@ -29,7 +29,6 @@ Flags:`
 
 var (
 	generateCmd      = flag.NewFlagSet("", flag.ExitOnError)
-	typeKind         = generateCmd.String("kind", "struct", "kind of type to parse")
 	typeName         = generateCmd.String("type", "", "name of the type to parse")
 	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
 	output           = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
@@ -94,18 +93,11 @@ func (c generateCommand) Run() error {
 		// Default: process whole package in current directory.
 		args = []string{"."}
 	}
-	var parseFunc generator.ParseFunc
-	switch *typeKind {
-	case "struct":
-		parseFunc = parser.ParseStruct
-	case "interface":
-		parseFunc = parser.ParseInterface
-	}
 	buf, err := generator.Generate(
 		utils.LoadPackage(args, tags),
 		string(template),
 		*typeName,
-		parseFunc,
+		parser.Parser,
 	)
 	if err != nil {
 		return err

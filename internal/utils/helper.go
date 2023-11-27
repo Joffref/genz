@@ -64,7 +64,7 @@ func CreatePkgWithCode(t *testing.T, goCode string) *packages.Package {
 		t.Fatalf("failed while writing file: %v", err)
 	}
 
-	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax, Tests: false}
+	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax | packages.NeedImports, Tests: false}
 	pkgs, err := packages.Load(cfg, path.Join(tmp, "main.go"))
 	if err != nil {
 		t.Fatalf("failed to load package: %v", err)

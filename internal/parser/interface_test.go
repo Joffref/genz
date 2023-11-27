@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/Joffref/genz/internal/utils"
 	"github.com/google/go-cmp/cmp"
+	"go/ast"
 	"reflect"
 	"testing"
 )
@@ -11,7 +12,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 	testCases := map[string]struct {
 		goCode            string
 		interfaceName     string
-		expectedInterface Interface
+		expectedInterface Element
 	}{
 		"basic interface": {
 			goCode: `
@@ -20,9 +21,9 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			type A interface {}
 			`,
 			interfaceName: "A",
-			expectedInterface: Interface{
+			expectedInterface: Element{
 				Type:    Type{Name: "main.A", InternalName: "A"},
-				Methods: []Method{},
+				Methods: nil,
 			},
 		},
 		"interface with one method": {
@@ -34,7 +35,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Interface{
+			expectedInterface: Element{
 				Type: Type{Name: "main.A", InternalName: "A"},
 				Methods: []Method{
 					{
@@ -58,7 +59,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Interface{
+			expectedInterface: Element{
 				Type: Type{Name: "main.A", InternalName: "A"},
 				Methods: []Method{
 					{
@@ -80,6 +81,104 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				},
 			},
 		},
+		"interface with one method with comments": {
+			goCode: `
+			package main
+
+			type A interface {
+				//Foo does something
+				Foo()
+			}
+			`,
+			interfaceName: "A",
+			expectedInterface: Element{
+				Type: Type{Name: "main.A", InternalName: "A"},
+				Methods: []Method{
+					{
+						Name:              "Foo",
+						Params:            []Type{},
+						Returns:           []Type{},
+						IsPointerReceiver: false,
+						IsExported:        true,
+						Comments:          []string{"Foo does something"},
+					},
+				},
+			},
+		},
+		"interface with one method with params": {
+			goCode: `
+			package main
+			
+			type A interface {
+				Foo(a int, b string)
+			}
+			`,
+			interfaceName: "A",
+			expectedInterface: Element{
+				Type: Type{Name: "main.A", InternalName: "A"},
+				Methods: []Method{
+					{
+						Name:              "Foo",
+						Params:            []Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						Returns:           []Type{},
+						IsPointerReceiver: false,
+						IsExported:        true,
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"interface with one method with returns": {
+			goCode: `
+			package main
+
+			type A interface {
+				Foo() (int, string)
+			}
+			`,
+			interfaceName: "A",
+			expectedInterface: Element{
+				Type: Type{Name: "main.A", InternalName: "A"},
+				Methods: []Method{
+					{
+						Name:              "Foo",
+						Params:            []Type{},
+						Returns:           []Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						IsPointerReceiver: false,
+						IsExported:        true,
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"interface with a sub interface": {
+			goCode: `	
+			package main
+		
+			type A interface {
+				Foo() (int, string)
+			}
+			
+			type B interface {
+				// A is a sub interface
+				A
+			}
+			`,
+			interfaceName: "B",
+			expectedInterface: Element{
+				Type: Type{Name: "main.B", InternalName: "B"},
+				Methods: []Method{
+					{
+						Name:              "Foo",
+						Params:            []Type{},
+						Returns:           []Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						IsPointerReceiver: false,
+						IsExported:        true,
+						Comments:          []string{" A is a sub interface"},
+					},
+				},
+			},
+		},
 	}
 	for name, tc := range testCases {
 		tc := tc
@@ -88,7 +187,11 @@ func TestParseInterfaceSuccess(t *testing.T) {
 
 			pkg := utils.CreatePkgWithCode(t, tc.goCode)
 
-			iface, err := ParseInterface(pkg, tc.interfaceName)
+			expr, err := loadAstExpr(pkg, tc.interfaceName)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			iface, err := parseInterface(pkg, tc.interfaceName, expr.(*ast.InterfaceType))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
