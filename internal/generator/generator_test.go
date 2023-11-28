@@ -3,17 +3,17 @@ package generator_test
 import (
 	"bytes"
 	"errors"
+	"github.com/Joffref/genz/pkg/models"
 	"strings"
 	"testing"
 
 	"github.com/Joffref/genz/internal/generator"
-	"github.com/Joffref/genz/internal/parser"
 	"golang.org/x/tools/go/packages"
 )
 
 func TestGenerateErrorParse(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.ParsedElement, error) {
-		return parser.ParsedElement{}, errors.New("failed to parse package")
+	parseFunc := func(pkg *packages.Package, structName string) (models.ParsedElement, error) {
+		return models.ParsedElement{}, errors.New("failed to parse package")
 	}
 	_, err := generator.Generate(nil, "template", "typeName", parseFunc)
 	if err == nil {
@@ -25,8 +25,8 @@ func TestGenerateErrorParse(t *testing.T) {
 }
 
 func TestGenerateErrorTemplateParse(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.ParsedElement, error) {
-		return parser.ParsedElement{}, nil
+	parseFunc := func(pkg *packages.Package, structName string) (models.ParsedElement, error) {
+		return models.ParsedElement{}, nil
 	}
 	_, err := generator.Generate(nil, "{{", "typeName", parseFunc)
 	if err == nil {
@@ -38,8 +38,8 @@ func TestGenerateErrorTemplateParse(t *testing.T) {
 }
 
 func TestGenerateErrorTemplateExecute(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.ParsedElement, error) {
-		return parser.ParsedElement{}, nil
+	parseFunc := func(pkg *packages.Package, structName string) (models.ParsedElement, error) {
+		return models.ParsedElement{}, nil
 	}
 	_, err := generator.Generate(nil, "{{.Foo}}", "typeName", parseFunc)
 	if err == nil {
@@ -51,10 +51,10 @@ func TestGenerateErrorTemplateExecute(t *testing.T) {
 }
 
 func TestGenerateSuccess(t *testing.T) {
-	parseFunc := func(pkg *packages.Package, structName string) (parser.ParsedElement, error) {
-		return parser.ParsedElement{
-			Element: parser.Element{
-				Type: parser.Type{
+	parseFunc := func(pkg *packages.Package, structName string) (models.ParsedElement, error) {
+		return models.ParsedElement{
+			Element: models.Element{
+				Type: models.Type{
 					Name: "TypeName",
 				},
 			},

@@ -2,15 +2,16 @@ package parser
 
 import (
 	"fmt"
+	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
 	"go/types"
 
 	"golang.org/x/tools/go/packages"
 )
 
-func parseStruct(pkg *packages.Package, structName string, structType *ast.StructType) (Element, error) {
-	parsedStruct := Element{
-		Type: Type{
+func parseStruct(pkg *packages.Package, structName string, structType *ast.StructType) (models.Element, error) {
+	parsedStruct := models.Element{
+		Type: models.Type{
 			Name:         fmt.Sprintf("%s.%s", pkg.Name, structName),
 			InternalName: structName,
 		},
@@ -22,7 +23,7 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 		if ident.Name == structName {
 			namedType, err := objectAsNamedType(object)
 			if err != nil {
-				return Element{}, err
+				return models.Element{}, err
 			}
 
 			signatures := map[string]*types.Signature{}
@@ -32,7 +33,7 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 
 			parsedStruct.Methods, err = parseMethods(signatures)
 			if err != nil {
-				return Element{}, err
+				return models.Element{}, err
 			}
 		}
 	}
@@ -40,8 +41,8 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 	return parsedStruct, nil
 }
 
-func structAttributes(typesInfo *types.Info, structType *ast.StructType) []Attribute {
-	attributes := make([]Attribute, len(structType.Fields.List))
+func structAttributes(typesInfo *types.Info, structType *ast.StructType) []models.Attribute {
+	attributes := make([]models.Attribute, len(structType.Fields.List))
 
 	for i, field := range structType.Fields.List {
 		comments := []string{}
@@ -51,7 +52,7 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []Attri
 			}
 		}
 
-		attributes[i] = Attribute{
+		attributes[i] = models.Attribute{
 			Name:     field.Names[0].Name,
 			Type:     parseType(typesInfo.TypeOf(field.Type)),
 			Comments: comments,

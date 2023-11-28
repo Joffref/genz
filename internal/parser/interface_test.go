@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/Joffref/genz/internal/utils"
+	"github.com/Joffref/genz/pkg/models"
 	"github.com/google/go-cmp/cmp"
 	"go/ast"
 	"reflect"
@@ -12,7 +13,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 	testCases := map[string]struct {
 		goCode            string
 		interfaceName     string
-		expectedInterface Element
+		expectedInterface models.Element
 	}{
 		"basic interface": {
 			goCode: `
@@ -21,8 +22,8 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			type A interface {}
 			`,
 			interfaceName: "A",
-			expectedInterface: Element{
-				Type:    Type{Name: "main.A", InternalName: "A"},
+			expectedInterface: models.Element{
+				Type:    models.Type{Name: "main.A", InternalName: "A"},
 				Methods: nil,
 			},
 		},
@@ -35,13 +36,13 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Methods: []Method{
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []Type{},
-						Returns:           []Type{},
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{},
@@ -59,21 +60,21 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Methods: []Method{
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Methods: []models.Method{
 					{
-						Name:              "Foo",
-						Params:            []Type{},
-						Returns:           []Type{},
+						Name:              "Bar",
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{},
 					},
 					{
-						Name:              "Bar",
-						Params:            []Type{},
-						Returns:           []Type{},
+						Name:              "Foo",
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{},
@@ -91,13 +92,13 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Methods: []Method{
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []Type{},
-						Returns:           []Type{},
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{"Foo does something"},
@@ -114,13 +115,13 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Methods: []Method{
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
-						Returns:           []Type{},
+						Params:            []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{},
@@ -137,13 +138,13 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			}
 			`,
 			interfaceName: "A",
-			expectedInterface: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Methods: []Method{
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []Type{},
-						Returns:           []Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						Params:            []models.Type{},
+						Returns:           []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{},
@@ -162,16 +163,25 @@ func TestParseInterfaceSuccess(t *testing.T) {
 			type B interface {
 				// A is a sub interface
 				A
+				Bar()
 			}
 			`,
 			interfaceName: "B",
-			expectedInterface: Element{
-				Type: Type{Name: "main.B", InternalName: "B"},
-				Methods: []Method{
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.B", InternalName: "B"},
+				Methods: []models.Method{
+					{
+						Name:              "Bar",
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
+						IsPointerReceiver: false,
+						IsExported:        true,
+						Comments:          []string{},
+					},
 					{
 						Name:              "Foo",
-						Params:            []Type{},
-						Returns:           []Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						Params:            []models.Type{},
+						Returns:           []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
 						IsPointerReceiver: false,
 						IsExported:        true,
 						Comments:          []string{" A is a sub interface"},

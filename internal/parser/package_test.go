@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/Joffref/genz/internal/utils"
+	"github.com/Joffref/genz/pkg/models"
 	"sort"
 	"testing"
 )
@@ -9,13 +10,13 @@ import (
 func TestParsePackageSuccess(t *testing.T) {
 	testCases := map[string]struct {
 		goCode          string
-		expectedPackage ParsedElement
+		expectedPackage models.ParsedElement
 	}{
 		"basic package": {
 			goCode: `
 			package main
 			`,
-			expectedPackage: ParsedElement{
+			expectedPackage: models.ParsedElement{
 				PackageName:    "main",
 				PackageImports: []string{},
 			},
@@ -26,7 +27,7 @@ func TestParsePackageSuccess(t *testing.T) {
 
 			import "fmt"
 			`,
-			expectedPackage: ParsedElement{
+			expectedPackage: models.ParsedElement{
 				PackageName:    "main",
 				PackageImports: []string{"fmt"},
 			},
@@ -40,7 +41,7 @@ func TestParsePackageSuccess(t *testing.T) {
 				"time"
 			)
 			`,
-			expectedPackage: ParsedElement{
+			expectedPackage: models.ParsedElement{
 				PackageName:    "main",
 				PackageImports: []string{"time", "fmt"},
 			},

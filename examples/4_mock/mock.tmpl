@@ -1,4 +1,7 @@
-package test
+package {{ .PackageName }}
+
+{{ range .PackageImports }}import "{{ . }}"
+{{ end }}
 
 type {{.Type.InternalName}}Mock struct {
     {{ range .Methods }}{{ .Name }}Func func({{ range $index, $element := .Params }} param{{$index}} {{ .Name }}{{ end }}) {{ range .Returns }}{{ .InternalName }}{{ end }}

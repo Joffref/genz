@@ -4,7 +4,7 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	"github.com/Joffref/genz/internal/parser"
+	"github.com/Joffref/genz/pkg/models"
 	"go/format"
 	"html/template"
 	"log"
@@ -13,7 +13,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-type ParseFunc func(pkg *packages.Package, typeName string) (parser.ParsedElement, error)
+type ParseFunc func(pkg *packages.Package, typeName string) (models.ParsedElement, error)
 
 func Generate(
 	pkg *packages.Package,

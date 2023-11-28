@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/Joffref/genz/internal/utils"
+	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
 	"reflect"
 	"testing"
@@ -13,7 +14,7 @@ func TestParseStructSuccess(t *testing.T) {
 	testCases := map[string]struct {
 		goCode         string
 		structName     string
-		expectedStruct Element
+		expectedStruct models.Element
 	}{
 		"basic struct": {
 			goCode: `
@@ -22,9 +23,9 @@ func TestParseStructSuccess(t *testing.T) {
 			type A struct {}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
 			},
 		},
 		"struct with one attribute": {
@@ -36,12 +37,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "string", InternalName: "string"},
+						Type:     models.Type{Name: "string", InternalName: "string"},
 						Comments: []string{},
 					},
 				},
@@ -57,17 +58,17 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "string", InternalName: "string"},
+						Type:     models.Type{Name: "string", InternalName: "string"},
 						Comments: []string{},
 					},
 					{
 						Name:     "bar",
-						Type:     Type{Name: "uint", InternalName: "uint"},
+						Type:     models.Type{Name: "uint", InternalName: "uint"},
 						Comments: []string{},
 					},
 				},
@@ -84,12 +85,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "string", InternalName: "string"},
+						Type:     models.Type{Name: "string", InternalName: "string"},
 						Comments: []string{"comment 1", "comment 2"},
 					},
 				},
@@ -104,12 +105,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "string", InternalName: "string"},
+						Type:     models.Type{Name: "string", InternalName: "string"},
 						Comments: []string{},
 					},
 				},
@@ -124,12 +125,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "B",
-			expectedStruct: Element{
-				Type: Type{Name: "main.B", InternalName: "B"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.B", InternalName: "B"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "[]string", InternalName: "[]string"},
+						Type:     models.Type{Name: "[]string", InternalName: "[]string"},
 						Comments: []string{},
 					},
 				},
@@ -145,12 +146,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "B",
-			expectedStruct: Element{
-				Type: Type{Name: "main.B", InternalName: "B"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.B", InternalName: "B"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "main.A", InternalName: "A"},
+						Type:     models.Type{Name: "main.A", InternalName: "A"},
 						Comments: []string{},
 					},
 				},
@@ -166,12 +167,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "B",
-			expectedStruct: Element{
-				Type: Type{Name: "main.B", InternalName: "B"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.B", InternalName: "B"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "[]main.A", InternalName: "[]A"},
+						Type:     models.Type{Name: "[]main.A", InternalName: "[]A"},
 						Comments: []string{},
 					},
 				},
@@ -187,12 +188,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "B",
-			expectedStruct: Element{
-				Type: Type{Name: "main.B", InternalName: "B"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.B", InternalName: "B"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "map[main.A]main.A", InternalName: "map[A]A"},
+						Type:     models.Type{Name: "map[main.A]main.A", InternalName: "map[A]A"},
 						Comments: []string{},
 					},
 				},
@@ -211,12 +212,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "B",
-			expectedStruct: Element{
-				Type: Type{Name: "main.B", InternalName: "B"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.B", InternalName: "B"},
+				Attributes: []models.Attribute{
 					{
 						Name:     "foo",
-						Type:     Type{Name: "struct{bar []main.A; baz string}", InternalName: "struct{bar []A; baz string}"},
+						Type:     models.Type{Name: "struct{bar []main.A; baz string}", InternalName: "struct{bar []A; baz string}"},
 						Comments: []string{},
 					},
 				},
@@ -231,16 +232,16 @@ func TestParseStructSuccess(t *testing.T) {
 			func (a A) foo() {}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
-				Methods: []Method{
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
 					{
 						Name:              "foo",
 						IsExported:        false,
 						IsPointerReceiver: false,
-						Params:            []Type{},
-						Returns:           []Type{},
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
 						Comments:          []string{},
 					},
 				},
@@ -255,16 +256,16 @@ func TestParseStructSuccess(t *testing.T) {
 			func (a *A) foo() {}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
-				Methods: []Method{
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
 					{
 						Name:              "foo",
 						IsExported:        false,
 						IsPointerReceiver: true,
-						Params:            []Type{},
-						Returns:           []Type{},
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
 						Comments:          []string{},
 					},
 				},
@@ -281,16 +282,16 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
-				Methods: []Method{
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
 					{
 						Name:              "foo",
 						IsExported:        false,
 						IsPointerReceiver: false,
-						Params:            []Type{{Name: "string", InternalName: "string"}},
-						Returns:           []Type{{Name: "int", InternalName: "int"}},
+						Params:            []models.Type{{Name: "string", InternalName: "string"}},
+						Returns:           []models.Type{{Name: "int", InternalName: "int"}},
 						Comments:          []string{},
 					},
 				},
@@ -308,16 +309,16 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
-				Methods: []Method{
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
 					{
 						Name:              "foo",
 						IsExported:        false,
 						IsPointerReceiver: false,
-						Params:            []Type{{Name: "main.T", InternalName: "T"}},
-						Returns:           []Type{{Name: "main.T", InternalName: "T"}},
+						Params:            []models.Type{{Name: "main.T", InternalName: "T"}},
+						Returns:           []models.Type{{Name: "main.T", InternalName: "T"}},
 						Comments:          []string{},
 					},
 				},
@@ -335,16 +336,16 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
-				Methods: []Method{
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
 					{
 						Name:              "foo",
 						IsExported:        false,
 						IsPointerReceiver: false,
-						Params:            []Type{{Name: "map[main.T]main.T", InternalName: "map[T]T"}},
-						Returns:           []Type{{Name: "struct{name main.T}", InternalName: "struct{name T}"}},
+						Params:            []models.Type{{Name: "map[main.T]main.T", InternalName: "map[T]T"}},
+						Returns:           []models.Type{{Name: "struct{name main.T}", InternalName: "struct{name T}"}},
 						Comments:          []string{},
 					},
 				},
@@ -361,16 +362,16 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type:       Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{},
-				Methods: []Method{
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
 					{
 						Name:              "Foo",
 						IsExported:        true,
 						IsPointerReceiver: true,
-						Params:            []Type{{Name: "string", InternalName: "string"}, {Name: "uint", InternalName: "uint"}},
-						Returns:           []Type{{Name: "int", InternalName: "int"}, {Name: "error", InternalName: "error"}},
+						Params:            []models.Type{{Name: "string", InternalName: "string"}, {Name: "uint", InternalName: "uint"}},
+						Returns:           []models.Type{{Name: "int", InternalName: "int"}, {Name: "error", InternalName: "error"}},
 						Comments:          []string{},
 					},
 				},
@@ -389,12 +390,12 @@ func TestParseStructSuccess(t *testing.T) {
 			}
 			`,
 			structName: "A",
-			expectedStruct: Element{
-				Type: Type{Name: "main.A", InternalName: "A"},
-				Attributes: []Attribute{
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{
 					{
 						Name: "foo",
-						Type: Type{
+						Type: models.Type{
 							Name:         "string",
 							InternalName: "string",
 						},
@@ -402,7 +403,7 @@ func TestParseStructSuccess(t *testing.T) {
 					},
 					{
 						Name: "bar",
-						Type: Type{
+						Type: models.Type{
 							Name:         "uuid.UUID",
 							InternalName: "UUID",
 						},
@@ -410,7 +411,7 @@ func TestParseStructSuccess(t *testing.T) {
 					},
 					{
 						Name: "baz",
-						Type: Type{
+						Type: models.Type{
 							Name:         "map[uuid.UUID]uuid.UUID",
 							InternalName: "map[UUID]UUID",
 						},
