@@ -6,7 +6,7 @@ Thus, a key part of GenZ is writing templates that will be used to generate code
 ## Template Syntax
 
 GenZ uses [go templates](https://pkg.go.dev/text/template) to generate code. Thus, you can use all the features of go templates to generate your code.
-Plus, we use [sprig](http://masterminds.github.io/sprig) to provide additional functions to the templates.
+additionally, we included [sprig](http://masterminds.github.io/sprig) to provide additional functions to the templates (the same as in Helm)
 
 ## Template Data
 

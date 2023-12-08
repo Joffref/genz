@@ -29,7 +29,7 @@ impacting your velocity and maintainability as your model grows.
 Large projects like Kubernetes already automate utility code code by leveraging on static analysis and code generation
 (e.g. [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [controller-gen](https://book.kubebuilder.io/reference/controller-gen)).
 For example, [adding Go "markers" comments on interfaces declaration](https://book.kubebuilder.io/reference/markers)
-indicates business rules to the generator that will created the associated code.
+indicates business rules to the generator that will create the associated code.
 Why wouldn't we create our own markers and generator ?
 
 #### Parenthesis on reflection
@@ -42,7 +42,7 @@ There are many libraries that use tags to generate code (e.g. [gorm](https://gor
 
 The issues with tags are:
 - they use reflection under the hood
-- they only work on structs and not on other types (e.g. interfaces)
+- they only work on structs attributes and not on other types (e.g. methods, interfaces)
 
 **We wanted a simple, generic and testable solution to introspect our models and generate code at compile time.**
 

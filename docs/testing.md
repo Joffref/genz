@@ -2,8 +2,10 @@
 
 ## Why testing templates?
 
-Testing your templates is a good way to ensure that your templates are working as expected. 
-It's also a good way to ensure that your templates are not broken when you update GenZ or your templates themselves.
+Testing your templates is a good way to ensure that:
+* the generated code is exactly the one you expect
+* the generated code does what you expect from it (by running it against unit tests)
+It's also a good way catch regressions when you update GenZ or your templates themselves.
 
 ## How to test your templates?
 
