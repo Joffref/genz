@@ -19,6 +19,8 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 
 	parsedStruct.Attributes = structAttributes(pkg.TypesInfo, structType)
 
+	var methods []models.Method
+
 	for ident, object := range pkg.TypesInfo.Uses {
 		if ident.Name == structName {
 			namedType, err := objectAsNamedType(object)
@@ -26,18 +28,16 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 				return models.Element{}, err
 			}
 
-			signatures := map[string]*types.Signature{}
 			for i := 0; i < namedType.NumMethods(); i++ {
-				signatures[namedType.Method(i).Name()] = namedType.Method(i).Type().(*types.Signature)
-			}
-
-			parsedStruct.Methods, err = parseMethods(signatures)
-			if err != nil {
-				return models.Element{}, err
+				method, err := parseMethod(namedType.Method(i).Name(), namedType.Method(i).Type().(*types.Signature))
+				if err != nil {
+					return models.Element{}, err
+				}
+				methods = append(methods, method)
 			}
 		}
 	}
-
+	parsedStruct.Methods = methods
 	return parsedStruct, nil
 }
 

@@ -16,58 +16,39 @@ func parseInterface(pkg *packages.Package, interfaceName string, interfaceType *
 		return models.Element{}, err
 	}
 
-	signatures := map[string]*types.Signature{}
-	comments := map[string][]string{}
+	var methods []models.Method
 
 	for _, method := range interfaceType.Methods.List {
 		switch pkg.TypesInfo.TypeOf(method.Type).(type) {
 		case *types.Signature:
-			signatures[method.Names[0].Name] = pkg.TypesInfo.TypeOf(method.Type).(*types.Signature)
+			methodModel, err := parseMethod(method.Names[0].Name, pkg.TypesInfo.TypeOf(method.Type).(*types.Signature))
+			if err != nil {
+				return models.Element{}, err
+			}
 			if method.Doc != nil {
 				for _, comment := range method.Doc.List {
-					comments[method.Names[0].Name] = append(comments[method.Names[0].Name], comment.Text[2:])
+					methodModel.Comments = append(methodModel.Comments, comment.Text[2:])
 				}
 			}
+			methods = append(methods, methodModel)
 		case *types.Named: // Embedded interface
 			namedType := pkg.TypesInfo.TypeOf(method.Type).(*types.Named)
 			iface := namedType.Origin().Underlying().(*types.Interface).Complete()
 			for i := 0; i < iface.NumMethods(); i++ {
-				signatures[iface.Method(i).Name()] = iface.Method(i).Type().(*types.Signature)
+				methodModel, err := parseMethod(iface.Method(i).Name(), iface.Method(i).Type().(*types.Signature))
+				if err != nil {
+					return models.Element{}, err
+				}
 				if method.Doc != nil {
 					for _, comment := range method.Doc.List {
-						comments[iface.Method(i).Name()] = append(comments[iface.Method(i).Name()], comment.Text[2:])
+						methodModel.Comments = append(methodModel.Comments, comment.Text[2:])
 					}
 				}
+				methods = append(methods, methodModel)
 			}
 		}
 
 	}
-	methods, err := parseMethods(signatures)
-	if err != nil {
-		return models.Element{}, err
-	}
-
-	var methodsWithComments []models.Method
-	for _, method := range methods {
-		if comments[method.Name] != nil {
-			addCommentsToMethod(&method, comments[method.Name])
-		}
-		if len(methodsWithComments) == 0 {
-			methodsWithComments = append(methodsWithComments, method)
-			continue
-		}
-		// order methods by name, to make the output deterministic.
-		for i, methodWithComments := range methodsWithComments {
-			if method.Name < methodWithComments.Name { // It's not possible to have two methods with the same name in an interface.
-				methodsWithComments = append(methodsWithComments[:i], append([]models.Method{method}, methodsWithComments[i:]...)...)
-				break
-			}
-			if i == len(methodsWithComments)-1 {
-				methodsWithComments = append(methodsWithComments, method)
-				break
-			}
-		}
-	}
-	parsedInterface.Methods = methodsWithComments
+	parsedInterface.Methods = methods
 	return parsedInterface, nil
 }

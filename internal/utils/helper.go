@@ -2,14 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"golang.org/x/tools/go/packages"
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
-	"testing"
-
-	"golang.org/x/tools/go/packages"
 )
 
 func LoadPackage(patterns []string, tags []string) *packages.Package {
@@ -53,25 +50,4 @@ func RunCommand(command []string, verbose bool) error {
 		return fmt.Errorf("failed to run %s: %w", commandStr, err)
 	}
 	return nil
-}
-
-func CreatePkgWithCode(t *testing.T, goCode string) *packages.Package {
-	t.Helper()
-
-	tmp := t.TempDir()
-	err := os.WriteFile(path.Join(tmp, "main.go"), []byte(goCode), 0644)
-	if err != nil {
-		t.Fatalf("failed while writing file: %v", err)
-	}
-
-	cfg := &packages.Config{Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax | packages.NeedImports, Tests: false}
-	pkgs, err := packages.Load(cfg, path.Join(tmp, "main.go"))
-	if err != nil {
-		t.Fatalf("failed to load package: %v", err)
-	}
-	if len(pkgs) != 1 {
-		t.Fatalf("expected 1 package, got %d", len(pkgs))
-	}
-
-	return pkgs[0]
 }

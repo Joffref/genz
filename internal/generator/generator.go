@@ -13,13 +13,13 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-type ParseFunc func(pkg *packages.Package, typeName string) (models.ParsedElement, error)
+type parseFunc func(pkg *packages.Package, typeName string) (models.ParsedElement, error)
 
 func Generate(
 	pkg *packages.Package,
 	templateContent string,
 	typeName string,
-	parse ParseFunc,
+	parse parseFunc,
 ) (bytes.Buffer, error) {
 	log.Printf("generating template for type %s", typeName)
 

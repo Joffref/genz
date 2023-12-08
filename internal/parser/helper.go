@@ -77,9 +77,3 @@ func loadAstExpr(pkg *packages.Package, typeName string) (ast.Expr, error) {
 	}
 	return nil, fmt.Errorf("%s not found in package %s", typeName, pkg.Name)
 }
-
-// addCommentsToMethod adds the given comments to the given method.
-// It is useful to add comments to methods without copying the whole method.
-func addCommentsToMethod(method *models.Method, comments []string) {
-	method.Comments = comments
-}

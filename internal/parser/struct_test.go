@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/Joffref/genz/internal/utils"
+	"github.com/Joffref/genz/internal/testutils"
 	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
 	"reflect"
@@ -427,7 +427,7 @@ func TestParseStructSuccess(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			pkg := utils.CreatePkgWithCode(t, tc.goCode)
+			pkg := testutils.CreatePkgWithCode(t, tc.goCode)
 
 			expr, err := loadAstExpr(pkg, tc.structName)
 			if err != nil {

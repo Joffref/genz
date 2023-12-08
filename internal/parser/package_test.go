@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/Joffref/genz/internal/utils"
+	"github.com/Joffref/genz/internal/testutils"
 	"github.com/Joffref/genz/pkg/models"
 	"sort"
 	"testing"
@@ -46,13 +46,24 @@ func TestParsePackageSuccess(t *testing.T) {
 				PackageImports: []string{"time", "fmt"},
 			},
 		},
+		"package with one import alias": {
+			goCode: `
+			package main
+
+			import f "fmt"
+			`,
+			expectedPackage: models.ParsedElement{
+				PackageName:    "main",
+				PackageImports: []string{"fmt"},
+			},
+		},
 	}
 	for name, tc := range testCases {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			pkg := utils.CreatePkgWithCode(t, tc.goCode)
+			pkg := testutils.CreatePkgWithCode(t, tc.goCode)
 
 			parsedPackage, err := parsePackage(pkg)
 			if err != nil {
