@@ -10,8 +10,7 @@ additionally, we included [sprig](http://masterminds.github.io/sprig) to provide
 
 ## Template Data
 
-The data injected into the templates can vary depending on the type used to generate the code. Thus, we provide a cheatsheet for each type.
-You can find the cheatsheets in the [input_cheatsheet.md](./input_cheatsheet.md) file.
+The data injected into the templates can vary depending on the type used to generate the code.
 
 ## Template Examples
 
