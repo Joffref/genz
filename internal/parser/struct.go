@@ -5,6 +5,7 @@ import (
 	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
 	"go/types"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -51,13 +52,30 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []model
 				comments = append(comments, comment.Text[2:])
 			}
 		}
-
 		attributes[i] = models.Attribute{
 			Name:     field.Names[0].Name,
 			Type:     parseType(typesInfo.TypeOf(field.Type)),
 			Comments: comments,
 		}
+		if field.Tag != nil {
+			attributes[i].Tags = parseTags(field.Tag.Value)
+		}
 	}
 
 	return attributes
+}
+
+// parseTags take a string of tags (e.g. `json:"name,omitempty" xml:"name"`)
+// and returns a map of tags (e.g. map[string]string{"json": "name,omitempty", "xml": "name"})
+func parseTags(tags string) map[string]string {
+	var result = make(map[string]string)
+	tags = strings.ReplaceAll(tags, "`", "")
+	for _, tag := range strings.Split(tags, "\" ") {
+		if tag == "" {
+			continue
+		}
+		splitTag := strings.Split(tag, ":")
+		result[splitTag[0]] = strings.ReplaceAll(splitTag[1], "\"", "")
+	}
+	return result
 }

@@ -42,6 +42,11 @@ type (
 		// List of the comments of the attribute.
 		// Only upper comments are parsed. No inline comments.
 		Comments []string
+
+		// Tags of the attribute. e.g. `json:"foo,omitempty"`
+		// The map key is the tag name, the map value is the tag value.
+		// e.g. `json:"foo,omitempty"` => map[string]string{"json": "foo,omitempty"}
+		Tags map[string]string
 	}
 
 	// Method represents a struct's method or an interface's method.
