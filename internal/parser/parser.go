@@ -2,157 +2,39 @@ package parser
 
 import (
 	"fmt"
+	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
-	"go/types"
-
 	"golang.org/x/tools/go/packages"
 )
 
-func Parse(pkg *packages.Package, structName string) (Struct, error) {
-	parsedStruct := Struct{
-		Type: Type{
-			Name:         fmt.Sprintf("%s.%s", pkg.Name, structName),
-			InternalName: structName,
-		},
+// Parser returns a models.ParsedElement from the given *packages.Package and type name.
+// It's the main entry point for the different parsers (struct, interface, etc).
+func Parser(pkg *packages.Package, typeName string) (models.ParsedElement, error) {
+	parsedElement, err := parsePackage(pkg)
+	if err != nil {
+		return models.ParsedElement{}, err
 	}
-
-	found := false
-	for ident := range pkg.TypesInfo.Defs {
-		if ident.Name == structName {
-			structType, err := identAsStructType(ident)
-			if err != nil {
-				return Struct{}, err
-			}
-
-			parsedStruct.Attributes = structAttributes(pkg.TypesInfo, structType)
-			found = true
-			break
-		}
+	expr, err := loadAstExpr(pkg, typeName)
+	if err != nil {
+		return models.ParsedElement{}, err
 	}
-	if !found {
-		return Struct{}, fmt.Errorf("struct %s not found in package %s", structName, pkg.Name)
+	element, err := parseElement(pkg, expr, typeName)
+	if err != nil {
+		return models.ParsedElement{}, err
 	}
-
-	for ident, object := range pkg.TypesInfo.Uses {
-		if ident.Name == structName {
-			namedType, err := objectAsNamedType(object)
-			if err != nil {
-				return Struct{}, err
-			}
-
-			parsedStruct.Methods, err = structMethods(namedType)
-			if err != nil {
-				return Struct{}, err
-			}
-		}
-	}
-
-	return parsedStruct, nil
+	parsedElement.Element = element
+	return parsedElement, nil
 }
 
-func identAsStructType(ident *ast.Ident) (*ast.StructType, error) {
-	typeSpec, isTypeSpec := ident.Obj.Decl.(*ast.TypeSpec)
-	if !isTypeSpec {
-		return nil, fmt.Errorf("%s is not a type", ident.Name)
+// parseElement parses the given ast.Expr and returns a models.Element.
+// It calls the appropriate parse* function depending on the type of the given ast.Expr.
+func parseElement(pkg *packages.Package, expr ast.Expr, name string) (models.Element, error) {
+	switch expr := expr.(type) {
+	case *ast.StructType:
+		return parseStruct(pkg, name, expr)
+	case *ast.InterfaceType:
+		return parseInterface(pkg, name, expr)
+	default:
+		return models.Element{}, fmt.Errorf("unsupported type %T", expr)
 	}
-
-	structDeclaration, isStruct := typeSpec.Type.(*ast.StructType)
-	if !isStruct {
-		return nil, fmt.Errorf("%s is not a struct", ident.Name)
-	}
-
-	return structDeclaration, nil
-}
-
-func objectAsNamedType(object types.Object) (*types.Named, error) {
-	typeName, isTypeName := object.(*types.TypeName)
-	if !isTypeName {
-		return nil, fmt.Errorf("%s is not a TypeName", object.Name())
-	}
-	namedType, isNamedType := typeName.Type().(*types.Named)
-	if !isNamedType {
-		return nil, fmt.Errorf("%s is not a named type", object.Name())
-	}
-
-	return namedType, nil
-}
-
-func structAttributes(typesInfo *types.Info, structType *ast.StructType) []Attribute {
-	attributes := make([]Attribute, len(structType.Fields.List))
-
-	for i, field := range structType.Fields.List {
-		comments := []string{}
-		if field.Doc != nil {
-			for _, comment := range field.Doc.List {
-				comments = append(comments, comment.Text[2:])
-			}
-		}
-
-		attributes[i] = Attribute{
-			Name:     field.Names[0].Name,
-			Type:     parseType(typesInfo.TypeOf(field.Type)),
-			Comments: comments,
-		}
-	}
-
-	return attributes
-}
-
-func structMethods(namedType *types.Named) ([]Method, error) {
-	methods := make([]Method, namedType.NumMethods())
-
-	for i := 0; i < namedType.NumMethods(); i++ {
-		declaration := namedType.Method(i)
-		signature, isSignature := declaration.Type().(*types.Signature)
-		if !isSignature {
-			return nil, fmt.Errorf("cannot get signature from method %s", declaration.Name())
-		}
-
-		params := []Type{}
-		if signature.Params() != nil {
-			params = make([]Type, signature.Params().Len())
-			for j := 0; j < signature.Params().Len(); j++ {
-				params[j] = parseType(signature.Params().At(j).Type())
-			}
-		}
-
-		returns := []Type{}
-		if signature.Results() != nil {
-			returns = make([]Type, signature.Results().Len())
-			for j := 0; j < signature.Results().Len(); j++ {
-				returns[j] = parseType(signature.Results().At(j).Type())
-			}
-		}
-
-		_, isPointerReceiver := signature.Recv().Type().(*types.Pointer)
-
-		methods[i] = Method{
-			Name:              declaration.Name(),
-			IsExported:        declaration.Exported(),
-			IsPointerReceiver: isPointerReceiver,
-			Params:            params,
-			Returns:           returns,
-			Comments:          []string{}, // TODO
-		}
-	}
-
-	return methods, nil
-}
-
-func parseType(t types.Type) Type {
-	// Remove every qualifier before the type name
-	// transforming "github.com/google/uuid.UUID" into "UUID"
-	noPackageQualifier := func(_ *types.Package) string { return "" }
-
-	// Adds the package name qualifier before the type name
-	// transforming "github.com/google/uuid.UUID" into "uuid.UUID"
-	packageNameQualifier := func(pkg *types.Package) string {
-		return pkg.Name()
-	}
-
-	return Type{
-		Name:         types.TypeString(t, packageNameQualifier), // (e.g. "uuid.UUID")
-		InternalName: types.TypeString(t, noPackageQualifier),   // (e.g. "UUID")
-	}
-
 }

@@ -2,12 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"golang.org/x/tools/go/packages"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
-
-	"golang.org/x/tools/go/packages"
 )
 
 func LoadPackage(patterns []string, tags []string) *packages.Package {
