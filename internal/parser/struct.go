@@ -2,9 +2,11 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
+	"go/doc"
 	"go/types"
+
+	"github.com/Joffref/genz/pkg/models"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -19,6 +21,11 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 
 	parsedStruct.Attributes = structAttributes(pkg.TypesInfo, structType)
 
+	pkgDoc, err := doc.NewFromFiles(pkg.Fset, pkg.Syntax, "./", doc.AllDecls)
+	if err != nil {
+		return models.Element{}, fmt.Errorf("failed to create doc while parsing struct: %w", err)
+	}
+
 	var methods []models.Method
 
 	for ident, object := range pkg.TypesInfo.Uses {
@@ -29,7 +36,11 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 			}
 
 			for i := 0; i < namedType.NumMethods(); i++ {
-				method, err := parseMethod(namedType.Method(i).Name(), namedType.Method(i).Type().(*types.Signature))
+				method, err := parseMethodWithComments(
+					getFuncDoc(pkgDoc, structName, namedType.Method(i).Name()),
+					namedType.Method(i).Name(),
+					namedType.Method(i).Type().(*types.Signature),
+				)
 				if err != nil {
 					return models.Element{}, err
 				}
@@ -60,4 +71,21 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []model
 	}
 
 	return attributes
+}
+
+func getFuncDoc(pkgDoc *doc.Package, structName, funcName string) *doc.Func {
+	var typeDoc *doc.Type
+	for _, t := range pkgDoc.Types {
+		if t.Name == structName {
+			typeDoc = t
+		}
+	}
+
+	for _, m := range typeDoc.Methods {
+		if m.Name == funcName {
+			return m
+		}
+	}
+
+	return nil
 }

@@ -1,11 +1,12 @@
 package parser
 
 import (
-	"github.com/Joffref/genz/internal/testutils"
-	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
 	"reflect"
 	"testing"
+
+	"github.com/Joffref/genz/internal/testutils"
+	"github.com/Joffref/genz/pkg/models"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -247,6 +248,32 @@ func TestParseStructSuccess(t *testing.T) {
 				},
 			},
 		},
+		"one empty method, comments": {
+			goCode: `
+			package main
+
+			type A struct {}
+
+			// comment 1
+			// comment 2
+			func (a A) foo() {}
+			`,
+			structName: "A",
+			expectedStruct: models.Element{
+				Type:       models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{},
+				Methods: []models.Method{
+					{
+						Name:              "foo",
+						IsExported:        false,
+						IsPointerReceiver: false,
+						Params:            []models.Type{},
+						Returns:           []models.Type{},
+						Comments:          []string{"comment 1", "comment 2"},
+					},
+				},
+			},
+		},
 		"one empty method, pointer receiver": {
 			goCode: `
 			package main
@@ -351,12 +378,13 @@ func TestParseStructSuccess(t *testing.T) {
 				},
 			},
 		},
-		"one exported method with 2 params and 2 returns, pointer receiver": {
+		"one exported method with 2 params and 2 returns, pointer receiver, comment": {
 			goCode: `
 			package main
 
 			type A struct {}
 
+			// comment
 			func (a *A) Foo(a string, b uint) (int, error) {
 				return 0
 			}
@@ -372,7 +400,7 @@ func TestParseStructSuccess(t *testing.T) {
 						IsPointerReceiver: true,
 						Params:            []models.Type{{Name: "string", InternalName: "string"}, {Name: "uint", InternalName: "uint"}},
 						Returns:           []models.Type{{Name: "int", InternalName: "int"}, {Name: "error", InternalName: "error"}},
-						Comments:          []string{},
+						Comments:          []string{"comment"},
 					},
 				},
 			},
@@ -382,7 +410,7 @@ func TestParseStructSuccess(t *testing.T) {
 			package main
 
 			import "github.com/google/uuid"
-			
+
 			type A struct {
 				foo string
 				bar uuid.UUID

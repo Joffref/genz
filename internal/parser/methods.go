@@ -1,14 +1,23 @@
 package parser
 
 import (
-	"github.com/Joffref/genz/pkg/models"
 	"go/ast"
+	"go/doc"
 	"go/types"
+	"strings"
+
+	"github.com/Joffref/genz/pkg/models"
 )
 
-// parseMethod returns a  models.Method from the given map of method signatures.
-// It's not responsible for parsing the methods' comments. It should be done by the caller.
 func parseMethod(name string, signature *types.Signature) (models.Method, error) {
+	return parseMethodWithComments(nil, name, signature)
+}
+
+func parseMethodWithComments(doc *doc.Func, name string, signature *types.Signature) (models.Method, error) {
+	comments := []string{}
+	if doc != nil && doc.Doc != "" {
+		comments = strings.Split(strings.Trim(doc.Doc, "\n"), "\n")
+	}
 
 	params := []models.Type{}
 	if signature.Params() != nil {
@@ -34,6 +43,6 @@ func parseMethod(name string, signature *types.Signature) (models.Method, error)
 		IsPointerReceiver: isPointerReceiver,
 		Params:            params,
 		Returns:           returns,
-		Comments:          []string{}, // It has to be filled later by the caller.
+		Comments:          comments,
 	}, nil
 }
