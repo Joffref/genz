@@ -1,12 +1,13 @@
 package parser
 
 import (
-	"github.com/Joffref/genz/internal/testutils"
-	"github.com/Joffref/genz/pkg/models"
-	"github.com/google/go-cmp/cmp"
 	"go/ast"
 	"reflect"
 	"testing"
+
+	"github.com/Joffref/genz/internal/testutils"
+	"github.com/Joffref/genz/pkg/models"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParseInterfaceSuccess(t *testing.T) {
