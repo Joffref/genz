@@ -448,6 +448,40 @@ func TestParseStructSuccess(t *testing.T) {
 				},
 			},
 		},
+		"struct with tags": {
+			goCode: `
+			package main
+
+			type A struct {
+				foo string ` + "`json:\"foo\"`" + `
+				bar string ` + "`json:\"bar\" xml:\"bar\"`" + `
+			}
+			`,
+			structName: "A",
+			expectedStruct: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Attributes: []models.Attribute{
+					{
+						Name: "foo",
+						Type: models.Type{
+							Name:         "string",
+							InternalName: "string",
+						},
+						Comments: []string{},
+						Tags:     map[string]string{"json": "foo"},
+					},
+					{
+						Name: "bar",
+						Type: models.Type{
+							Name:         "string",
+							InternalName: "string",
+						},
+						Comments: []string{},
+						Tags:     map[string]string{"json": "bar", "xml": "bar"},
+					},
+				},
+			},
+		},
 	}
 
 	for name, tc := range testCases {
@@ -468,6 +502,62 @@ func TestParseStructSuccess(t *testing.T) {
 
 			if !reflect.DeepEqual(gotStruct, tc.expectedStruct) {
 				t.Fatalf("output struct doesn't match expected:\n%s", cmp.Diff(gotStruct, tc.expectedStruct))
+			}
+		})
+	}
+}
+
+func Test_parseTags(t *testing.T) {
+	testCases := map[string]struct {
+		tags    string
+		want    map[string]string
+		wantErr bool
+	}{
+		"empty tags": {
+			tags:    "",
+			want:    map[string]string{},
+			wantErr: false,
+		},
+		"one tag": {
+			tags:    "`json:\"name\"`",
+			want:    map[string]string{"json": "name"},
+			wantErr: false,
+		},
+		"two tags": {
+			tags:    "`json:\"name\" xml:\"name\"`",
+			want:    map[string]string{"json": "name", "xml": "name"},
+			wantErr: false,
+		},
+		"tag with options": {
+			tags:    "`json:\"name,omitempty\"`",
+			want:    map[string]string{"json": "name,omitempty"},
+			wantErr: false,
+		},
+		"tag with options and spaces": {
+			tags:    "`json:\"name, omitempty\"`",
+			want:    map[string]string{"json": "name, omitempty"},
+			wantErr: false,
+		},
+		"two tags with options": {
+			tags:    "`json:\"name,omitempty\" xml:\"name\"`",
+			want:    map[string]string{"json": "name,omitempty", "xml": "name"},
+			wantErr: false,
+		},
+		"malformed tag": {
+			tags:    "`json:\"name\" xml\"name\"",
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			got, err := parseTags(tc.tags)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("parseTags() error = %v, wantErr %v", err, tc.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("parseTags() = %v, want %v", got, tc.want)
 			}
 		})
 	}

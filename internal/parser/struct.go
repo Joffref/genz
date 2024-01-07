@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/doc"
 	"go/types"
+	"strings"
 
 	"github.com/Joffref/genz/pkg/models"
 
@@ -19,7 +20,12 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 		},
 	}
 
-	parsedStruct.Attributes = structAttributes(pkg.TypesInfo, structType)
+	attributes, err := structAttributes(pkg.TypesInfo, structType)
+	if err != nil {
+		return models.Element{}, err
+	}
+
+	parsedStruct.Attributes = attributes
 
 	pkgDoc, err := doc.NewFromFiles(pkg.Fset, pkg.Syntax, "./", doc.AllDecls)
 	if err != nil {
@@ -52,7 +58,7 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 	return parsedStruct, nil
 }
 
-func structAttributes(typesInfo *types.Info, structType *ast.StructType) []models.Attribute {
+func structAttributes(typesInfo *types.Info, structType *ast.StructType) ([]models.Attribute, error) {
 	attributes := make([]models.Attribute, len(structType.Fields.List))
 
 	for i, field := range structType.Fields.List {
@@ -62,15 +68,39 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []model
 				comments = append(comments, comment.Text[2:])
 			}
 		}
-
 		attributes[i] = models.Attribute{
 			Name:     field.Names[0].Name,
 			Type:     parseType(typesInfo.TypeOf(field.Type)),
 			Comments: comments,
 		}
+		if field.Tag != nil {
+			tags, err := parseTags(field.Tag.Value)
+			if err != nil {
+				return nil, err
+			}
+			attributes[i].Tags = tags
+		}
 	}
 
-	return attributes
+	return attributes, nil
+}
+
+// parseTags take a string of tags (e.g. `json:"name,omitempty" xml:"name"`)
+// and returns a map of tags (e.g. map[string]string{"json": "name,omitempty", "xml": "name"})
+func parseTags(tags string) (map[string]string, error) {
+	var result = make(map[string]string)
+	tags = strings.ReplaceAll(tags, "`", "")
+	for _, tag := range strings.Split(tags, "\" ") {
+		if tag == "" {
+			continue
+		}
+		splitTag := strings.Split(tag, ":")
+		if len(splitTag) != 2 {
+			return nil, fmt.Errorf("invalid tag: %s", tag)
+		}
+		result[splitTag[0]] = strings.ReplaceAll(splitTag[1], "\"", "")
+	}
+	return result, nil
 }
 
 func getFuncDoc(pkgDoc *doc.Package, structName, funcName string) *doc.Func {
