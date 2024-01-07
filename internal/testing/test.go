@@ -3,11 +3,12 @@ package testing
 import (
 	"errors"
 	"fmt"
-	"github.com/Joffref/genz/internal/utils"
 	"log"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/Joffref/genz/internal/utils"
 )
 
 func RunTests(directory string, verbose, exitOnError bool) error {
@@ -17,11 +18,10 @@ func RunTests(directory string, verbose, exitOnError bool) error {
 	}
 	var subDirectories []string
 	for _, f := range entries {
-		if f.IsDir() {
-			subDirectories = append(subDirectories, f.Name())
+		if !f.IsDir() {
 			continue
 		}
-		if f.Name() == "expected.go" {
+		if f.Name() == "expected" {
 			log.Printf("=== ☶ - Running test in %s ===\n", directory)
 			if err := runTest(directory, verbose); err != nil {
 				log.Print(err.Error())
@@ -30,6 +30,7 @@ func RunTests(directory string, verbose, exitOnError bool) error {
 			}
 			log.Printf("=== ✔ - End of test in %s without error ===\n\n\n", directory)
 		}
+		subDirectories = append(subDirectories, f.Name())
 	}
 	var errs error
 	for _, name := range subDirectories {
@@ -49,11 +50,11 @@ func runTest(directory string, verbose bool) error {
 	if err := utils.RunCommand([]string{"go", "generate", fmt.Sprintf("./%s", directory)}, verbose); err != nil {
 		return err
 	}
-	expected, err := os.ReadFile(path.Join(directory, "expected.go"))
+	expected, err := os.ReadFile(path.Join(directory, "expected", "expected.go"))
 	if err != nil {
 		return fmt.Errorf("failed to read expected.go file: %w", err)
 	}
-	dir, err := os.ReadDir(directory)
+	dir, err := os.ReadDir(path.Join(directory, "expected"))
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func runTest(directory string, verbose bool) error {
 	var generatedFiles []string
 	for _, f := range dir {
 		if strings.HasSuffix(f.Name(), ".gen.go") {
-			generatedFiles = append(generatedFiles, path.Join(directory, f.Name()))
+			generatedFiles = append(generatedFiles, path.Join(directory, "expected", f.Name()))
 		}
 	}
 	if len(generatedFiles) == 0 {
@@ -88,9 +89,9 @@ func runTest(directory string, verbose bool) error {
 		return err
 	}
 	if verbose {
-		log.Printf("Running go test in %s\n", directory)
+		log.Printf("Running go test in %s\n", path.Join(directory, "expected"))
 	}
-	if err := utils.RunCommand([]string{"go", "test", "-v", fmt.Sprintf("./%s", directory)}, verbose); err != nil {
+	if err := utils.RunCommand([]string{"go", "test", "-v", fmt.Sprintf("./%s", path.Join(directory, "expected"))}, verbose); err != nil {
 		return err
 	}
 	if verbose {
