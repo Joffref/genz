@@ -18,7 +18,12 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 		},
 	}
 
-	parsedStruct.Attributes = structAttributes(pkg.TypesInfo, structType)
+	attributes, err := structAttributes(pkg.TypesInfo, structType)
+	if err != nil {
+		return models.Element{}, err
+	}
+
+	parsedStruct.Attributes = attributes
 
 	var methods []models.Method
 
@@ -42,7 +47,7 @@ func parseStruct(pkg *packages.Package, structName string, structType *ast.Struc
 	return parsedStruct, nil
 }
 
-func structAttributes(typesInfo *types.Info, structType *ast.StructType) []models.Attribute {
+func structAttributes(typesInfo *types.Info, structType *ast.StructType) ([]models.Attribute, error) {
 	attributes := make([]models.Attribute, len(structType.Fields.List))
 
 	for i, field := range structType.Fields.List {
@@ -58,16 +63,20 @@ func structAttributes(typesInfo *types.Info, structType *ast.StructType) []model
 			Comments: comments,
 		}
 		if field.Tag != nil {
-			attributes[i].Tags = parseTags(field.Tag.Value)
+			tags, err := parseTags(field.Tag.Value)
+			if err != nil {
+				return nil, err
+			}
+			attributes[i].Tags = tags
 		}
 	}
 
-	return attributes
+	return attributes, nil
 }
 
 // parseTags take a string of tags (e.g. `json:"name,omitempty" xml:"name"`)
 // and returns a map of tags (e.g. map[string]string{"json": "name,omitempty", "xml": "name"})
-func parseTags(tags string) map[string]string {
+func parseTags(tags string) (map[string]string, error) {
 	var result = make(map[string]string)
 	tags = strings.ReplaceAll(tags, "`", "")
 	for _, tag := range strings.Split(tags, "\" ") {
@@ -75,7 +84,10 @@ func parseTags(tags string) map[string]string {
 			continue
 		}
 		splitTag := strings.Split(tag, ":")
+		if len(splitTag) != 2 {
+			return nil, fmt.Errorf("invalid tag: %s", tag)
+		}
 		result[splitTag[0]] = strings.ReplaceAll(splitTag[1], "\"", "")
 	}
-	return result
+	return result, nil
 }
