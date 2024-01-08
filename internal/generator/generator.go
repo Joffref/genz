@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Joffref/genz/pkg/models"
-	"go/format"
 	"html/template"
 	"log"
 
@@ -40,16 +39,4 @@ func Generate(
 
 	log.Printf("generated buffer (%d bytes)", buf.Len())
 	return buf, nil
-}
-
-func Format(buf bytes.Buffer) []byte {
-	log.Print("gofmt-ing buffer")
-
-	src, err := format.Source(buf.Bytes())
-	if err != nil {
-		log.Printf("warning: internal error: invalid Go generated: %s", err)
-		log.Printf("warning: compile the package to analyze the error")
-		return buf.Bytes()
-	}
-	return src
 }

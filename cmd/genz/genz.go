@@ -1,19 +1,19 @@
 package genz
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"github.com/Joffref/genz/internal/parser"
+	"github.com/Joffref/genz/pkg/models"
 	"io"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
+	"plugin"
 	"strings"
 
 	"github.com/Joffref/genz/internal/command"
-	"github.com/Joffref/genz/internal/generator"
 	"github.com/Joffref/genz/internal/utils"
 )
 
@@ -22,17 +22,17 @@ type generateCommand struct {
 
 const (
 	generateCommandUsage = `Usage of genz:
-	genz [flags] -type T -template foo.tmpl [directory]
-	genz [flags] -type T -template foo.tmpl files... # Must be a single package
+	genz [flags] -type T -generator path/to/my/custom/generator:entrypoint [directory]
+	genz [flags] -type T -generator path/to/my/custom/generator:entrypoint files... # Must be a single package
 Flags:`
 )
 
 var (
-	generateCmd      = flag.NewFlagSet("", flag.ExitOnError)
-	typeName         = generateCmd.String("type", "", "name of the type to parse")
-	templateLocation = generateCmd.String("template", "", "go-template local or remote file")
-	output           = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
-	buildTags        = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
+	generateCmd = flag.NewFlagSet("", flag.ExitOnError)
+	typeName    = generateCmd.String("type", "", "name of the type to parse")
+	generator   = generateCmd.String("generator", "", "name of the generator to use (e.g: path/to/my/custom/generator:entrypoint)")
+	output      = generateCmd.String("output", "", "output file name; default srcdir/<type>.gen.go")
+	buildTags   = generateCmd.String("tags", "", "comma-separated list of build tags to apply")
 )
 
 func init() {
@@ -51,9 +51,13 @@ func (c generateCommand) ValidateArgs() error {
 		generateCmd.Usage()
 		return fmt.Errorf("missing 'type' argument")
 	}
-	if len(*templateLocation) == 0 {
+	if len(*generator) == 0 {
 		generateCmd.Usage()
-		return fmt.Errorf("missing 'template' argument")
+		return fmt.Errorf("missing 'generator' argument")
+	}
+	if len(strings.Split(*generator, ":")) != 2 {
+		generateCmd.Usage()
+		return fmt.Errorf("invalid 'generator' argument: should be path/to/my/custom/generator:entrypoint")
 	}
 	return nil
 }
@@ -68,23 +72,24 @@ func (c generateCommand) Run() error {
 		tags = strings.Split(*buildTags, ",")
 	}
 
-	var template []byte
-	if url, _ := url.ParseRequestURI(*templateLocation); url != nil {
-		response, err := http.Get(*templateLocation)
-		if err != nil {
-			return fmt.Errorf("failed to make a request to %s: %v", *templateLocation, err)
-		}
-		body, err := io.ReadAll(response.Body)
-		if err != nil {
-			return fmt.Errorf("could not read body of remote template %s: %v", *templateLocation, err)
-		}
-		template = body
-	} else {
-		file, err := os.ReadFile(*templateLocation)
-		if err != nil {
-			return fmt.Errorf("failed to read template file %s: %v", *templateLocation, err)
-		}
-		template = file
+	pluginPath := strings.Split(*generator, ":")[0]
+	if _, err := os.Stat(pluginPath); err != nil {
+		return fmt.Errorf("could not find generator plugin: %s", err)
+	}
+
+	p, err := plugin.Open(pluginPath)
+	if err != nil {
+		return fmt.Errorf("could not open generator plugin: %s", err)
+	}
+
+	userDefinedGenerator, err := p.Lookup(strings.Split(*generator, ":")[1])
+	if err != nil {
+		return fmt.Errorf("could not find generator entrypoint: %s", err)
+	}
+
+	userDefinedGeneratorFunc, ok := userDefinedGenerator.(func(writer io.Writer, element models.ParsedElement) error)
+	if !ok {
+		return fmt.Errorf("could not find generator entrypoint: %s", err)
 	}
 
 	// We accept either one directory or a list of files. Which do we have?
@@ -93,17 +98,15 @@ func (c generateCommand) Run() error {
 		// Default: process whole package in current directory.
 		args = []string{"."}
 	}
-	buf, err := generator.Generate(
-		utils.LoadPackage(args, tags),
-		string(template),
-		*typeName,
-		parser.Parser,
-	)
-	if err != nil {
-		return err
-	}
 
-	src := generator.Format(buf)
+	parsedElement, err := parser.Parser(utils.LoadPackage(args, tags), *typeName)
+
+	var buf bytes.Buffer
+	err = userDefinedGeneratorFunc(&buf, parsedElement)
+	if err != nil {
+		return fmt.Errorf("generating code: %s", err)
+	}
+	src := utils.Format(buf)
 
 	var dir string
 	if len(args) == 1 && utils.IsDirectory(args[0]) {

@@ -7,20 +7,14 @@ import (
 )
 
 func (v Human) Validate() error {
-
 	if v.Firstname != "" && !unicode.IsUpper(rune(v.Firstname[0])) {
 		return fmt.Errorf("attribute 'Firstname' should start with a capital letter")
 	}
-
 	if v.Lastname == "" {
 		return fmt.Errorf("attribute 'Lastname' must be set")
 	}
-
 	if v.Lastname != "" && !unicode.IsUpper(rune(v.Lastname[0])) {
 		return fmt.Errorf("attribute 'Lastname' should start with a capital letter")
 	}
-
-	// WORK IN PROGRESS
-
 	return nil
 }

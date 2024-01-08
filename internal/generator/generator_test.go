@@ -1,7 +1,6 @@
 package generator_test
 
 import (
-	"bytes"
 	"errors"
 	"github.com/Joffref/genz/pkg/models"
 	"strings"
@@ -66,19 +65,5 @@ func TestGenerateSuccess(t *testing.T) {
 	}
 	if buf.String() != "TypeName" {
 		t.Fatalf("expected TypeName, got %s", buf.String())
-	}
-}
-
-func TestFormatSuccessInvalidGoCode(t *testing.T) {
-	src := generator.Format(*bytes.NewBufferString("package[main\n\n\n"))
-	if string(src) != "package[main\n\n\n" {
-		t.Fatalf("expected formatted code, got: %q", src)
-	}
-}
-
-func TestFormatSuccessValidGoCode(t *testing.T) {
-	src := generator.Format(*bytes.NewBufferString(" package main\n\n\n"))
-	if string(src) != "package main\n" {
-		t.Fatalf("expected formatted code, got: %q", src)
 	}
 }
