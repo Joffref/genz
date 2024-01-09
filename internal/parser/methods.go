@@ -1,12 +1,11 @@
 package parser
 
 import (
+	"github.com/Joffref/genz/genz/models"
 	"go/ast"
 	"go/doc"
 	"go/types"
 	"strings"
-
-	"github.com/Joffref/genz/pkg/models"
 )
 
 func parseMethod(name string, signature *types.Signature) (models.Method, error) {

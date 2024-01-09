@@ -1,15 +1,15 @@
 package test
 
-//go:generate genz -type Car -template ../getters.tmpl -output car.gen.go
+//go:generate go run github.com/Joffref/genz/examples/2_getters -type Car -output car.gen.go
 type Car struct {
 
 	//+getter
-	model string
+	Model string
 
 	//+getter
-	wheels []Wheel
+	Wheels []Wheel
 
-	motorReference string
+	MotorReference string
 }
 
 type Wheel struct{}

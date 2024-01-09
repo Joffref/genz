@@ -1,4 +1,4 @@
-package generator
+package genz
 
 import (
 	"bytes"

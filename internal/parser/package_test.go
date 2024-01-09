@@ -1,8 +1,8 @@
 package parser
 
 import (
+	"github.com/Joffref/genz/genz/models"
 	"github.com/Joffref/genz/internal/testutils"
-	"github.com/Joffref/genz/pkg/models"
 	"sort"
 	"testing"
 )

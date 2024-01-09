@@ -1,10 +1,10 @@
 package parser
 
 import (
+	"github.com/Joffref/genz/genz/models"
 	"go/ast"
 	"go/types"
 
-	"github.com/Joffref/genz/pkg/models"
 	"golang.org/x/tools/go/packages"
 )
 

@@ -1,13 +1,12 @@
 package parser
 
 import (
+	"github.com/Joffref/genz/genz/models"
 	"go/ast"
 	"reflect"
 	"testing"
 
 	"github.com/Joffref/genz/internal/testutils"
-	"github.com/Joffref/genz/pkg/models"
-
 	"github.com/google/go-cmp/cmp"
 )
 
