@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
+	"go/format"
 	"golang.org/x/tools/go/packages"
 	"log"
 	"os"
@@ -50,4 +52,16 @@ func RunCommand(command []string, verbose bool) error {
 		return fmt.Errorf("failed to run %s: %w", commandStr, err)
 	}
 	return nil
+}
+
+func Format(buf bytes.Buffer) []byte {
+	log.Print("gofmt-ing buffer")
+
+	src, err := format.Source(buf.Bytes())
+	if err != nil {
+		log.Printf("warning: internal error: invalid Go generated: %s", err)
+		log.Printf("warning: compile the package to analyze the error")
+		return buf.Bytes()
+	}
+	return src
 }

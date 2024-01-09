@@ -1,9 +1,9 @@
 package test
 
-func (c *Car) GetModel() string {
-	return c.model
+func (v Car) GetModel() string {
+	return v.Model
 }
 
-func (c *Car) GetWheels() []Wheel {
-	return c.wheels
+func (v Car) GetWheels() []Wheel {
+	return v.Wheels
 }

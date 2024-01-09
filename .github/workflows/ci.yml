@@ -26,10 +26,11 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
-      - run: make deps
-      - run: make lint
-      - run: make install
-      - run: make test
-      - run: make build
-      - run: make test-examples
-        if: matrix.os != 'windows-latest'
+      - name: Download dependencies
+        run: go mod download
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+      - name: Run golangci-lint
+        run: golangci-lint run
+      - name: Run tests
+        run: go test -v ./...

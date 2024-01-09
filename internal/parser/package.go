@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/Joffref/genz/pkg/models"
+	"github.com/Joffref/genz/genz/models"
 	"golang.org/x/tools/go/packages"
 )
 

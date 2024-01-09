@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Joffref/genz/pkg/models"
+	"github.com/Joffref/genz/genz/models"
 	"go/ast"
 	"go/types"
 	"golang.org/x/tools/go/packages"
