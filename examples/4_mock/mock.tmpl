@@ -3,12 +3,12 @@ package {{ .PackageName }}
 {{ range .PackageImports }}import "{{ . }}"{{ end }}
 
 type {{.Type.InternalName}}Mock struct {
-    {{ range .Methods }}{{ .Name }}Func func({{ range $index, $element := .Params }} param{{$index}} {{ .Name }}{{ end }}) {{ range .Returns }}{{ .InternalName }}{{ end }}
+    {{ range .Methods }}{{ .Name }}Func func({{ range $index, $element := .Params }} {{$index}} {{ .Name }}{{ end }}) {{ range .Returns }}{{ .InternalName }}{{ end }}
     {{ end }}
 }
 
 {{ range .Methods }}
-func (m *{{ $.Type.InternalName }}Mock) {{ .Name }}({{ range $index, $element := .Params }}param{{$index}} {{ .Name }} {{ end }}) {{ range .Returns }}{{ .InternalName }}{{ end }} {
-    {{ if .Returns }}return {{ end }}m.{{ .Name }}Func({{ range $index, $element := .Params }}param{{$index}} {{ end }})
+func (m *{{ $.Type.InternalName }}Mock) {{ .Name }}({{ range $index, $element := .Params }}{{$index}} {{ .Name }} {{ end }}) {{ range .Returns }}{{ .InternalName }}{{ end }} {
+    {{ if .Returns }}return {{ end }}m.{{ .Name }}Func({{ range $index, $element := .Params }}{{$index}} {{ end }})
 }
 {{ end }}

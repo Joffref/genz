@@ -1,12 +1,12 @@
 package test
 
 type HelloMock struct {
-	SayHelloToFunc func(param0 string) string
+	SayHelloToFunc func(name string) string
 	HelloFunc      func() string
 }
 
-func (m *HelloMock) SayHelloTo(param0 string) string {
-	return m.SayHelloToFunc(param0)
+func (m *HelloMock) SayHelloTo(name string) string {
+	return m.SayHelloToFunc(name)
 }
 
 func (m *HelloMock) Hello() string {
