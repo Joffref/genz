@@ -2,6 +2,7 @@ package genz
 
 import (
 	"fmt"
+
 	"github.com/Joffref/genz/genz/models"
 	"github.com/Joffref/genz/internal/parser"
 	"github.com/Joffref/genz/internal/utils"
@@ -9,8 +10,8 @@ import (
 
 // Parse parses a type from a package
 // Note: patterns is a list of patterns to match packages (e.g . ; ./... ; github.com/Joffref/genz/...)
-func Parse(typeName string, patterns []string, buildTags ...string) (models.ParsedElement, error) {
-	pkg := utils.LoadPackage(patterns, buildTags)
+func Parse(typeName string, dir string, buildTags ...string) (models.ParsedElement, error) {
+	pkg := utils.LoadPackage(dir, buildTags)
 	if pkg == nil {
 		return models.ParsedElement{}, fmt.Errorf("could not load package")
 	}

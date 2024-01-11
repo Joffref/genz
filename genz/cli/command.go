@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/Joffref/genz/genz"
 	"os"
+
+	"github.com/Joffref/genz/genz"
 )
 
 type Command interface {
@@ -62,7 +63,7 @@ func (c commandFromGenerator) Execute() error {
 		args = []string{"."}
 	}
 
-	parsedElement, err := genz.Parse(*typeName, args, *output)
+	parsedElement, err := genz.Parse(*typeName, args[0], *output)
 	if err != nil {
 		return err
 	}

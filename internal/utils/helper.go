@@ -4,25 +4,27 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"golang.org/x/tools/go/packages"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
-func LoadPackage(patterns []string, tags []string) *packages.Package {
+func LoadPackage(dir string, tags []string) *packages.Package {
 	cfg := &packages.Config{
 		Mode:       packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
 		Tests:      false,
 		BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
+		Dir:        dir,
 	}
-	pkgs, err := packages.Load(cfg, patterns...)
+	pkgs, err := packages.Load(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if len(pkgs) != 1 {
-		log.Fatalf("error: %d packages matching %v", len(pkgs), strings.Join(patterns, " "))
+		log.Fatalf("error: %d packages matching %v", len(pkgs), dir)
 	}
 
 	return pkgs[0]
