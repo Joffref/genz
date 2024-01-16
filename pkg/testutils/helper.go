@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
-// ParseElement parses the given input and returns the parsed element
+// ParseElement parses the given code looking for type and returns the parsed element
 // If it fails, it fails the test
-func ParseElement(t *testing.T, input string, typeName string) models.ParsedElement {
-	p := testutils.CreatePkgWithCode(t, input)
-	element, err := parser.Parser(p, typeName)
+func ParseElement(t *testing.T, code string, typeName string) models.ParsedElement {
+	p := testutils.CreatePkgWithCode(t, code)
+	element, err := parser.Parse(p, typeName)
 	if err != nil {
 		t.Error(err)
 	}

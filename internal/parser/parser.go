@@ -8,9 +8,9 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// Parser returns a models.ParsedElement from the given *packages.Package and type name.
+// Parse returns a models.ParsedElement from the given *packages.Package and type name.
 // It's the main entry point for the different parsers (struct, interface, etc).
-func Parser(pkg *packages.Package, typeName string) (models.ParsedElement, error) {
+func Parse(pkg *packages.Package, typeName string) (models.ParsedElement, error) {
 	parsedElement, err := parsePackage(pkg)
 	if err != nil {
 		return models.ParsedElement{}, err
