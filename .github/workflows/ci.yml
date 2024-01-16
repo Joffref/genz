@@ -29,7 +29,7 @@ jobs:
       - name: Download dependencies
         run: go mod download
       - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - name: Run golangci-lint
         run: golangci-lint run
       - name: Run tests

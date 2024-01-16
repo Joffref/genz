@@ -5,7 +5,6 @@ import (
 	"github.com/Joffref/genz/genz/cli"
 	"github.com/Joffref/genz/genz/models"
 	"io"
-	"slices"
 )
 
 func main() {
@@ -16,7 +15,7 @@ func MyCustomGenerator(w io.Writer, parsedElement models.ParsedElement) error {
 	code := genz.NewCode(w, parsedElement.PackageName)
 
 	for _, attribute := range parsedElement.Attributes {
-		if slices.Contains(attribute.Comments, "+getter") {
+		if Contains(attribute.Comments, "+getter") {
 			code.WithDeclarations(
 				genz.Function("Get"+attribute.Name).
 					WithReceiver("v", parsedElement.Type.InternalName, false).
@@ -26,4 +25,13 @@ func MyCustomGenerator(w io.Writer, parsedElement models.ParsedElement) error {
 		}
 	}
 	return code.Generate()
+}
+
+func Contains(slice []string, element string) bool {
+	for _, e := range slice {
+		if e == element {
+			return true
+		}
+	}
+	return false
 }
