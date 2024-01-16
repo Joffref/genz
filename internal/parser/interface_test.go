@@ -42,7 +42,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -66,7 +66,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -74,7 +74,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 					},
 					{
 						Name:              "Bar",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -98,7 +98,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -121,7 +121,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						Params:            map[string]models.Type{"a": {Name: "int", InternalName: "int"}, "b": {Name: "string", InternalName: "string"}},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -144,7 +144,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -173,7 +173,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -181,7 +181,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 					},
 					{
 						Name:              "Bar",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -203,7 +203,29 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{{Name: "int", InternalName: "int"}, {Name: "string", InternalName: "string"}},
+						Params:            map[string]models.Type{"a": {Name: "int", InternalName: "int"}, "b": {Name: "string", InternalName: "string"}},
+						Returns:           []models.Type{},
+						IsPointerReceiver: false,
+						IsExported:        true,
+						Comments:          []string{},
+					},
+				},
+			},
+		},
+		"interface with method with unnamed params": {
+			goCode: `
+			package main
+
+			type A interface {
+				Foo(int, string)
+			}`,
+			interfaceName: "A",
+			expectedInterface: models.Element{
+				Type: models.Type{Name: "main.A", InternalName: "A"},
+				Methods: []models.Method{
+					{
+						Name:              "Foo",
+						Params:            map[string]models.Type{"0": {Name: "int", InternalName: "int"}, "1": {Name: "string", InternalName: "string"}},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -227,7 +249,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{{Name: "uuid.UUID", InternalName: "UUID"}},
+						Params:            map[string]models.Type{"a": {Name: "uuid.UUID", InternalName: "UUID"}},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -251,7 +273,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "Foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        true,
@@ -273,7 +295,7 @@ func TestParseInterfaceSuccess(t *testing.T) {
 				Methods: []models.Method{
 					{
 						Name:              "foo",
-						Params:            []models.Type{},
+						Params:            map[string]models.Type{},
 						Returns:           []models.Type{},
 						IsPointerReceiver: false,
 						IsExported:        false,

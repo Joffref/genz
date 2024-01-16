@@ -53,9 +53,10 @@ type (
 	Method struct {
 		// Name of the method. e.g. "Foo" for "Foo() string"s
 		Name string
-		// List of the parameters of the method. Empty if the method has no parameter.
+		// Maps of the parameters of the method. Empty if the method has no parameter.
+		// The map key is the parameter name, the map value is the parameter type.
 		// See Type for more details.
-		Params []Type
+		Params map[string]Type
 		// List of the return values of the method. Empty if the method has no return value.
 		// See Type for more details.
 		Returns []Type
@@ -73,7 +74,6 @@ type (
 	// Type represents a generic type among structs, interfaces, attributes, methods, etc.
 	// It is used to represent various types such as "string", "time.Time", "uuid.UUID", etc.
 	Type struct {
-
 		// Name of the type from outside its package
 		// Example `uuid.UUID` or `time.Time`
 		// Use this variable if you generate code outside the package of that type

@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/doc"
 	"go/types"
+	"strconv"
 	"strings"
 
 	"github.com/Joffref/genz/pkg/models"
@@ -19,11 +20,15 @@ func parseMethodWithComments(doc *doc.Func, name string, signature *types.Signat
 		comments = strings.Split(strings.Trim(doc.Doc, "\n"), "\n")
 	}
 
-	params := []models.Type{}
+	params := map[string]models.Type{}
 	if signature.Params() != nil {
-		params = make([]models.Type, signature.Params().Len())
+		params = make(map[string]models.Type, signature.Params().Len())
 		for j := 0; j < signature.Params().Len(); j++ {
-			params[j] = parseType(signature.Params().At(j).Type())
+			if signature.Params().At(j).Name() == "" { // unnamed parameter
+				params[strconv.Itoa(j)] = parseType(signature.Params().At(j).Type())
+				continue
+			}
+			params[signature.Params().At(j).Name()] = parseType(signature.Params().At(j).Type())
 		}
 	}
 

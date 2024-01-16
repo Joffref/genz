@@ -7,7 +7,7 @@ func TestHelloMock_SayHelloTo(t *testing.T) {
 		SayHelloToFunc func(param0 string) string
 	}
 	type args struct {
-		param0 string
+		name string
 	}
 	tests := []struct {
 		name   string
@@ -23,7 +23,7 @@ func TestHelloMock_SayHelloTo(t *testing.T) {
 				},
 			},
 			args: args{
-				param0: "",
+				name: "",
 			},
 			want: "",
 		},
@@ -33,7 +33,7 @@ func TestHelloMock_SayHelloTo(t *testing.T) {
 			m := &HelloMock{
 				SayHelloToFunc: tt.fields.SayHelloToFunc,
 			}
-			if got := m.SayHelloTo(tt.args.param0); got != tt.want {
+			if got := m.SayHelloTo(tt.args.name); got != tt.want {
 				t.Errorf("SayHelloTo() = %v, want %v", got, tt.want)
 			}
 		})

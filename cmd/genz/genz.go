@@ -97,7 +97,7 @@ func (c generateCommand) Run() error {
 		utils.LoadPackage(args, tags),
 		string(template),
 		*typeName,
-		parser.Parser,
+		parser.Parse,
 	)
 	if err != nil {
 		return err
